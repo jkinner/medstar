@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN" "http://java.sun.com/dtd/web-app_2_3.dtd">
+<!-- Copyright 2011 Sociodyne LLC. All rights reserved. -->
+<web-app>
+  <display-name>Sociodyne Uploader</display-name>
+  <listener>
+    <listener-class>com.sociodyne.upload.UploadServletConfig</listener-class>
+  </listener>
+</web-app>

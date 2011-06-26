@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="upload" basedir=".">
+	<description>
+            Validation of incoming patient lists and generation of reports for same.
+    </description>
+
+	<!-- Points to the subversion root for this repository -->
+	<property name="root.dir">../../../..</property>
+	<!-- The path name of the package we are in -->
+	<property name="package">com/sociodyne/upload</property>
+
+	<include file="${root.dir}/base_build.xml"/>
+
+	<fileset id="lib" dir="${root.dir}/lib">
+		<include name="aopalliance-alpha1.jar" />
+		<include name="commons-fileupload-1.2.2.jar" />
+		<include name="guice-3.0.jar" />
+		<include name="guice-multibindings-3.0.jar" />
+		<include name="guice-servlet-3.0.jar" />
+		<include name="javax.inject.jar" />
+		<include name="servlet-api.jar" />
+	</fileset>
+
+	<fileset id="test-lib" dir="${root.dir}/lib">
+		<include name="asm-3.3.1.jar" />
+		<include name="cglib-2.2.2.jar" />
+		<include name="easymock-3.0.jar" />
+		<include name="junit-4.0.jar" />
+		<include name="objenesis-1.2.jar" />
+	</fileset>
+
+	<!-- All targets defined in root base_build.xml -->
+</project>
