@@ -21,7 +21,7 @@ public class MockTest extends TestCase {
 
 	@Override
 	public void setUp() throws Exception {
-		Class clazz = this.getClass();
+		Class<?> clazz = this.getClass();
 		while (clazz != null && ! MockTest.class.equals(clazz)) {
 			for (Field field : clazz.getDeclaredFields()) {
 				Mock mockAnnotation = field.getAnnotation(Mock.class);
