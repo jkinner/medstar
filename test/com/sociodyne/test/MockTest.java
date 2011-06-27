@@ -21,30 +21,35 @@ public class MockTest extends TestCase {
 
 	@Override
 	public void setUp() throws Exception {
-		for (Field field : this.getClass().getDeclaredFields()) {
-			Mock mockAnnotation = field.getAnnotation(Mock.class);
-			if (mockAnnotation != null) {
-				Object mock;
-				if (mockAnnotation.value() != null) {
-					switch(mockAnnotation.value()) {
-						case STRICT:
-							mock = EasyMock.createStrictMock(field.getType());
-							break;
-						case NICE:
-							mock = EasyMock.createNiceMock(field.getType());
-							break;
-						case DEFAULT:
-						default:
-							mock = EasyMock.createMock(field.getType());
+		Class clazz = this.getClass();
+		while (clazz != null && ! MockTest.class.equals(clazz)) {
+			for (Field field : clazz.getDeclaredFields()) {
+				Mock mockAnnotation = field.getAnnotation(Mock.class);
+				if (mockAnnotation != null) {
+					Object mock;
+					if (mockAnnotation.value() != null) {
+						switch(mockAnnotation.value()) {
+							case STRICT:
+								mock = EasyMock.createStrictMock(field.getType());
+								break;
+							case NICE:
+								mock = EasyMock.createNiceMock(field.getType());
+								break;
+							case DEFAULT:
+							default:
+								mock = EasyMock.createMock(field.getType());
+						}
+					} else {
+						mock = EasyMock.createMock(field.getType());
 					}
-				} else {
-					mock = EasyMock.createMock(field.getType());
+	
+					field.setAccessible(true);
+					field.set(this, mock);
+					objectsToVerify.add(mock);
 				}
-
-				field.setAccessible(true);
-				field.set(this, mock);
-				objectsToVerify.add(mock);
 			}
+
+			clazz = clazz.getSuperclass();
 		}
 	}
 
