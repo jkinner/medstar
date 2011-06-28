@@ -10,18 +10,18 @@ import com.google.common.base.Objects;
  * 
  * @author jkinner@sociodyne.com (Jason Kinenr)
  */
-public class ImmutableEdiElementIdentifier {
+public class ImmutableEdiLocation {
 	protected String segment;
 	protected int element;
 	@Nullable protected Integer subElement;
 
-	public ImmutableEdiElementIdentifier(String segment, int element) {
+	public ImmutableEdiLocation(String segment, int element) {
 		this.segment = segment;
 		this.element = element;
 		subElement = null;
 	}
 
-	public ImmutableEdiElementIdentifier(String segment, int element, int subElement) {
+	public ImmutableEdiLocation(String segment, int element, int subElement) {
 		this.segment = segment;
 		this.element = element;
 		this.subElement = subElement;
@@ -48,8 +48,8 @@ public class ImmutableEdiElementIdentifier {
 	public boolean equals(Object o) {
 		if (o == this) { return true; }
 		
-		if (o instanceof ImmutableEdiElementIdentifier) {
-			ImmutableEdiElementIdentifier that = (ImmutableEdiElementIdentifier)o;
+		if (o instanceof ImmutableEdiLocation) {
+			ImmutableEdiLocation that = (ImmutableEdiLocation)o;
 			return Objects.equal(segment, that.segment) && Objects.equal(element, that.element)
 				&& Objects.equal(subElement, that.subElement);
 		}
@@ -57,11 +57,11 @@ public class ImmutableEdiElementIdentifier {
 		return false;
 	}
 
-	public static ImmutableEdiElementIdentifier of(String segment, int element) {
-		return new ImmutableEdiElementIdentifier(segment, element);
+	public static ImmutableEdiLocation of(String segment, int element) {
+		return new ImmutableEdiLocation(segment, element);
 	}
 
-	public static ImmutableEdiElementIdentifier of(String segment, int element, int subElement) {
-		return new ImmutableEdiElementIdentifier(segment, element, subElement);
+	public static ImmutableEdiLocation of(String segment, int element, int subElement) {
+		return new ImmutableEdiLocation(segment, element, subElement);
 	}
 }

@@ -1,12 +1,12 @@
 package com.sociodyne.validation.edi;
 
-public class EdiElementIdentifier extends ImmutableEdiElementIdentifier {
+public class EdiLocation extends ImmutableEdiLocation {
 
-	public EdiElementIdentifier(String segment, int element) {
+	public EdiLocation(String segment, int element) {
 		super(segment, element);
 	}
 
-	public EdiElementIdentifier(String segment, int element, int subElement) {
+	public EdiLocation(String segment, int element, int subElement) {
 		super(segment, element, subElement);
 	}
 
@@ -38,12 +38,12 @@ public class EdiElementIdentifier extends ImmutableEdiElementIdentifier {
 		this.subElement = null;
 	}
 
-	public static EdiElementIdentifier of(String segment, int element) {
-		return new EdiElementIdentifier(segment, element);
+	public static EdiLocation of(String segment, int element) {
+		return new EdiLocation(segment, element);
 	}
 
-	public static EdiElementIdentifier of(String segment, int element, int subElement) {
-		return new EdiElementIdentifier(segment, element, subElement);
+	public static EdiLocation of(String segment, int element, int subElement) {
+		return new EdiLocation(segment, element, subElement);
 	}
 
 }

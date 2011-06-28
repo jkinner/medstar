@@ -16,9 +16,7 @@ import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-public class EdiReaderTest extends MockTest {
-	@Mock(Mock.Type.STRICT) ContentHandler contentHandler;
-
+public class EdiReaderTest extends MockEdiParserTest {
 	// Note that these examples overide the default setting of '|' for the sub-element separator
 	private static final String VALID_ISA_HEADER =
 		"ISA*00*        *00*        *ZZ*T000000011  *ZZ*CMS *"
@@ -31,13 +29,52 @@ public class EdiReaderTest extends MockTest {
 		ByteArrayInputStream is = new ByteArrayInputStream(
 			SHORT_ISA_HEADER.getBytes());
 		contentHandler.startDocument();
-		contentHandler.startPrefixMapping("", EdiReader.NAMESPACE_URI);
-		contentHandler.startElement(eq(EdiReader.NAMESPACE_URI), eq("edi"), eq("edi"),
+		contentHandler.startPrefixMapping("", EdiConstants.NAMESPACE_URI);
+		contentHandler.startElement(eq(EdiConstants.NAMESPACE_URI), eq("edi"), eq("edi"),
 			anyObject(Attributes.class));
 		// expectShortISA()
 		expectShortIsaSegment();
 		// end: expectShortISA()
-		contentHandler.endElement(eq(EdiReader.NAMESPACE_URI), eq("edi"), eq("edi"));
+		contentHandler.endElement(eq(EdiConstants.NAMESPACE_URI), eq("edi"), eq("edi"));
+		contentHandler.endDocument();
+
+		replay();
+		reader.setContentHandler(contentHandler);
+		reader.parse(new InputSource(is));
+	}
+
+	private void expectRealIsaSegment() throws SAXException {
+		expectStartSegment("ISA");
+		expectSimpleElement("00");
+		expectSimpleElement("        ");
+		expectSimpleElement("00");
+		expectSimpleElement("        ");
+		expectSimpleElement("ZZ");
+		expectSimpleElement("T000000011  ");
+		expectSimpleElement("ZZ");
+		expectSimpleElement("CMS ");
+		expectSimpleElement("050516");
+		expectSimpleElement("0734");
+		expectSimpleElement("U");
+		expectSimpleElement("00401");
+		expectSimpleElement("000005014");
+		expectSimpleElement("1");
+		expectSimpleElement("P");
+		expectSimpleElement(":");
+		expectEndSegment();
+	}
+
+	public void testParseRealIsaSegment_succeeds() throws Exception {
+		EdiReader reader = new EdiReader();
+		ByteArrayInputStream is = new ByteArrayInputStream(
+			VALID_ISA_HEADER.getBytes());
+		contentHandler.startDocument();
+		contentHandler.startPrefixMapping("", EdiConstants.NAMESPACE_URI);
+		contentHandler.startElement(eq(EdiConstants.NAMESPACE_URI), eq("edi"), eq("edi"),
+			anyObject(Attributes.class));
+		expectRealIsaSegment();
+		// end: expectShortISA()
+		contentHandler.endElement(eq(EdiConstants.NAMESPACE_URI), eq("edi"), eq("edi"));
 		contentHandler.endDocument();
 
 		replay();
@@ -59,8 +96,8 @@ public class EdiReaderTest extends MockTest {
 		ByteArrayInputStream is = new ByteArrayInputStream(
 			(SHORT_ISA_HEADER + "EB*D*IND**MB*********HC:G0389~").getBytes());
 		contentHandler.startDocument();
-		contentHandler.startPrefixMapping("", EdiReader.NAMESPACE_URI);
-		contentHandler.startElement(eq(EdiReader.NAMESPACE_URI), eq("edi"), eq("edi"),
+		contentHandler.startPrefixMapping("", EdiConstants.NAMESPACE_URI);
+		contentHandler.startElement(eq(EdiConstants.NAMESPACE_URI), eq("edi"), eq("edi"),
 			anyObject(Attributes.class));
 
 		expectShortIsaSegment();
@@ -84,58 +121,13 @@ public class EdiReaderTest extends MockTest {
 		expectEndElement();
 		expectEndSegment();
 
-		contentHandler.endElement(eq(EdiReader.NAMESPACE_URI), eq("edi"), eq("edi"));
+		contentHandler.endElement(eq(EdiConstants.NAMESPACE_URI), eq("edi"), eq("edi"));
 		contentHandler.endDocument();
 		replay();
 		reader.setContentHandler(contentHandler);
 		reader.parse(new InputSource(is));
 	}
 
-	private void expectStartSegment(String type) throws SAXException {
-		EdiReader.EdiAttributes ediAttributes = new EdiReader.EdiAttributes();
-		ediAttributes.put(new QName("", "type", ""), type);
 
-		contentHandler.startElement(eq(EdiReader.NAMESPACE_URI), eq("segment"), eq("segment"),
-				eq(ediAttributes));
-	}
-
-	private void expectEndSegment() throws SAXException {
-		contentHandler.endElement(eq(EdiReader.NAMESPACE_URI), eq("segment"), eq("segment"));
-	}
-
-	private void expectStartElement() throws SAXException {
-		contentHandler.startElement(eq(EdiReader.NAMESPACE_URI), eq("element"), eq("element"),
-				anyObject(Attributes.class));
-	}
-
-	private void expectStartElement(String content) throws SAXException {
-		contentHandler.startElement(eq(EdiReader.NAMESPACE_URI), eq("element"), eq("element"),
-				anyObject(Attributes.class));
-		contentHandler.characters(aryEq(content.toCharArray()), eq(0), eq(content.length()));
-	}
-
-	private void expectEndElement() throws SAXException {
-		contentHandler.endElement(eq(EdiReader.NAMESPACE_URI), eq("element"), eq("element"));
-	}
-
-	private void expectSimpleElement() throws SAXException {
-		expectStartElement();
-		expectEndElement();
-	}
-
-	private void expectSimpleElement(String content) throws SAXException {
-		expectStartElement(content);
-		expectEndElement();
-	}
-	
-	private void expectStartSubElement(String content) throws SAXException {
-		contentHandler.startElement(eq(EdiReader.NAMESPACE_URI), eq("subelement"), eq("subelement"),
-				anyObject(Attributes.class));
-		contentHandler.characters(aryEq(content.toCharArray()), eq(0), eq(content.length()));
-	}
-
-	private void expectEndSubElement() throws SAXException {
-		contentHandler.endElement(eq(EdiReader.NAMESPACE_URI), eq("subelement"), eq("subelement"));
-	}
 
 }

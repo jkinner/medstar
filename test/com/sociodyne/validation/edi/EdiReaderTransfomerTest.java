@@ -33,15 +33,15 @@ public class EdiReaderTransfomerTest extends TestCase {
 
 	private static final class EdiNamespaceContext implements NamespaceContext {
 		public String getNamespaceURI(String prefix) {
-			return (prefix.equals("") || prefix.equals("edi"))?EdiReader.NAMESPACE_URI:null;
+			return (prefix.equals("") || prefix.equals("edi"))?EdiConstants.NAMESPACE_URI:null;
 		}
 
 		public String getPrefix(String namespaceUri) {
-			return namespaceUri.equals(EdiReader.NAMESPACE_URI)?"":null;
+			return namespaceUri.equals(EdiConstants.NAMESPACE_URI)?"":null;
 		}
 
 		public Iterator<String> getPrefixes(String namespaceUri) {
-			return namespaceUri.equals(EdiReader.NAMESPACE_URI)?
+			return namespaceUri.equals(EdiConstants.NAMESPACE_URI)?
 					Iterators.forArray(new String[] { "", "edi" })
 					:Iterators.<String>emptyIterator();
 		}

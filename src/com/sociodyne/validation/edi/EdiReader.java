@@ -2,11 +2,12 @@ package com.sociodyne.validation.edi;
 
 import com.sociodyne.LockingHolder;
 
-import java.io.EOFException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.lang.reflect.Constructor;
+import java.net.URL;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -45,25 +46,33 @@ import com.google.common.collect.ImmutableMap;
  * @author jkinner@sociodyne.com (Jason Kinner)
  */
 // TODO(jkinner): Loops (LS/LE and unbounded) and HL blocks
-public class EdiReader implements XMLReader {
+public class EdiReader implements XMLReader, EdiConstants {
 
-	public static final String NAMESPACE_URI = "http://www.sociodyne.com/xmlns/edi";
-	public static final String WRAP_EXCEPTIONS_FEATURE = "http://www.sociodyne.com/xmlns/xml/wrapExceptions";
+	/** Feature URI for wrapping exceptions with location information. */
+	public static final String WRAP_EXCEPTIONS_FEATURE =
+		"http://www.sociodyne.com/xmlns/xml/wrapExceptions";
+
+	/** SAX namespace feature URI. */
 	private static final String NAMESPACES_FEATURE = "http://xml.org/sax/features/namespaces";
-	private static final String NAMESPACE_PREFIXES_FEATURE = "http://xml.org/sax/features/namespace-prefixes";
+
+	/** SAX namespace prefix feature URI. */
+	private static final String NAMESPACE_PREFIXES_FEATURE =
+		"http://xml.org/sax/features/namespace-prefixes";
+	
 	// TODO(jkinner): Implement validation
+	/** SAX validation feature URI. */
 	private static final String VALIDATION_FEATURE = "http://xml.org/sax/features/validation";
 
-	private static final String SUBELEMENT_ELEMENT = "subelement";
-	private static final String ELEMENT_ELEMENT = "element";
-	private static final String TYPE_ATTRIBUTE = "type";
-	private static final ImmutableEdiElementIdentifier ISA_SUBELEMENT_IDENTIFIER = ImmutableEdiElementIdentifier
-			.of("ISA", 16);
-	private static final String SEGMENT_ELEMENT = "segment";
-	private static final Attributes EMPTY_ATTRIBUTES = new EdiAttributes();
+	/** An empty {@code Attributes} object. Used throughout the package as a singleton. */
+	static final Attributes EMPTY_ATTRIBUTES = new EdiAttributes();
 
+	/** Configured segment terminator. */
 	private char segmentTerminator = '~';
+
+	/** Configured element separator. */
 	private char elementSeparator = '*';
+
+	/** Configured sub-element separator. */
 	private char subElementSeparator = '|';
 
 	// XMLReader fields
@@ -72,30 +81,37 @@ public class EdiReader implements XMLReader {
 	private EntityResolver entityResolver;
 	private ErrorHandler errorHandler;
 
+	/** Value of the {@link #WRAP_EXCEPTIONS_FEATURE} feature. */
 	private boolean wrapExceptions = true;
+
+	/** Value of the {@link #NAMESPACE_FEATURE} feature. */
 	private boolean useNamespaces = true;
+
+	/** Value of the {@link #NAMESPACE_PREFIXES_FEATURE} feature. */
 	private boolean useNamespacePrefixes = false;
 
-	private static final Map<ImmutableEdiElementIdentifier, ValueTransformer<String, String>> ediValueTransformers = ImmutableMap
-			.of();
+	/** For a given EDI element, how its value should be transformed when converting to XML. */
+	private static final Map<ImmutableEdiLocation, ValueTransformer<String, String>>
+		ediValueTransformers = ImmutableMap.of();
 
-	private static final Map<ImmutableEdiElementIdentifier, String> wellKnownElements = ImmutableMap
-			.<ImmutableEdiElementIdentifier, String> builder()
-			.put(ImmutableEdiElementIdentifier.of("ISA", 2),
+	/** For a given EDI element, what its well-known identifier is. */
+	private static final Map<ImmutableEdiLocation, String> wellKnownElements = ImmutableMap
+			.<ImmutableEdiLocation, String> builder()
+			.put(ImmutableEdiLocation.of("ISA", 2),
 					"authorizationInformation")
-			.put(ImmutableEdiElementIdentifier.of("ISA", 3),
+			.put(ImmutableEdiLocation.of("ISA", 3),
 					"securityInformationQualifier")
-			.put(ImmutableEdiElementIdentifier.of("ISA", 5),
+			.put(ImmutableEdiLocation.of("ISA", 5),
 					"interchangeSenderIdQualifier")
-			.put(ImmutableEdiElementIdentifier.of("ISA", 6),
+			.put(ImmutableEdiLocation.of("ISA", 6),
 					"interchangeSenderId")
-			.put(ImmutableEdiElementIdentifier.of("ISA", 7),
+			.put(ImmutableEdiLocation.of("ISA", 7),
 					"interchangeReceiverIdQualifier")
-			.put(ImmutableEdiElementIdentifier.of("ISA", 8),
+			.put(ImmutableEdiLocation.of("ISA", 8),
 					"interchangeReceiverId")
-			.put(ImmutableEdiElementIdentifier.of("ISA", 14),
+			.put(ImmutableEdiLocation.of("ISA", 14),
 					"acknowledgementRequested")
-			.put(ImmutableEdiElementIdentifier.of("ISA", 16),
+			.put(ImmutableEdiLocation.of("ISA", 16),
 					"subElementSeparator").build();
 
 	public ContentHandler getContentHandler() {
@@ -149,12 +165,14 @@ public class EdiReader implements XMLReader {
 	}
 
 	public void parse(String url) throws IOException, SAXException {
+		InputStream is = new URL(url).openStream();
+		Reader r = new InputStreamReader(is, "UTF-8");
+		parseReader(r);
 	}
 
-	protected void parseReader(Reader is) throws IOException, SAXException {
+	protected void parseReader(Reader reader) throws IOException, SAXException {
 		// Build a configuration in a thread-safe way so multiple threads can
-		// use the same
-		// parser instance.
+		// use the same parser instance.
 		Configuration configuration;
 		Location location = new Location();
 		location.nextLine();
@@ -170,9 +188,18 @@ public class EdiReader implements XMLReader {
 		// TODO(jkinner): Fill in ANSI X12 version info?
 		contentHandler.startElement(NAMESPACE_URI, "edi", "edi",
 				EMPTY_ATTRIBUTES);
+		
+		// Configure the recursive-descent parsers
+		SubElementParser subElementParser = new SubElementParser(reader, configuration, location,
+				contentHandler, ediValueTransformers);
+		ElementParser elementParser = new ElementParser(reader, configuration, location,
+				contentHandler, subElementParser, ediValueTransformers);
+		SegmentParser segmentParser = new SegmentParser(reader, configuration, location,
+				contentHandler, elementParser);
+
 		try {
 			// Simple recursive-descent parser
-			parseSegments(is, configuration, location);
+			segmentParser.parse();
 		} catch (SAXException e) {
 			throw wrapThrowable(e, location);
 		} catch (IOException e) {
@@ -195,236 +222,6 @@ public class EdiReader implements XMLReader {
 		}
 
 		return false;
-	}
-
-	protected void parseSegments(Reader is, Configuration configuration,
-			Location location) throws IOException, SAXException {
-		StringBuffer accumulator = new StringBuffer();
-		String segmentIdentifier = null;
-
-		// TODO(jkinner): Auto-detect configuration while parsing segments
-		// (separators)
-		char elementSeparator = configuration.getElementSeparator();
-		int read;
-		Character ch = null;
-		while ((read = is.read()) != -1) {
-			ch = (char) read;
-
-			if (ch == '\n') {
-				location.nextLine();
-			} else {
-				location.nextChar();
-			}
-
-			if (ch == elementSeparator) {
-				if (segmentIdentifier == null) {
-					segmentIdentifier = accumulator.toString();
-
-					startSegment(segmentIdentifier, location);
-
-					// Now we recurse into the segment parsing
-					ch = parseElements(segmentIdentifier, is, configuration,
-							location);
-					endSegment(segmentIdentifier);
-					segmentIdentifier = null;
-
-					blank(accumulator);
-
-					continue;
-				}
-			} else if (ch == segmentTerminator) {
-				if (accumulator.length() > 0) {
-					segmentIdentifier = accumulator.toString();
-					startSegment(segmentIdentifier, location);
-					endSegment(segmentIdentifier);
-					segmentIdentifier = null;
-
-					continue;
-				}
-			}
-
-			accumulator.append(ch);
-		}
-
-		if (ch != null && ch != segmentTerminator && segmentIdentifier == null) {
-			throw new EOFException("Unexpected EOF when parsing segment "
-					+ " (missing segment terminator '" + segmentTerminator
-					+ "')");
-		}
-	}
-
-	private void endSegment(String segmentIdentifier) throws SAXException {
-		// The whole segment is finished. Send the "end" event.
-		contentHandler.endElement(NAMESPACE_URI, SEGMENT_ELEMENT,
-				SEGMENT_ELEMENT);
-	}
-
-	private void startSegment(String segmentIdentifier, Location location)
-			throws SAXException {
-		location.startSegment(segmentIdentifier);
-		EdiAttributes attributes = new EdiAttributes();
-		attributes.put(new QName("", TYPE_ATTRIBUTE, ""), segmentIdentifier);
-
-		// TODO(jkinner): Fill in attributes
-		// We are placing elements in the default namespace, so the qName ==
-		// localPart
-		contentHandler.startElement(NAMESPACE_URI, SEGMENT_ELEMENT,
-				SEGMENT_ELEMENT, attributes);
-	}
-
-	protected char parseElements(String segmentIdentifier, Reader reader,
-			Configuration configuration, Location location) throws IOException,
-			SAXException {
-		StringBuffer accumulator = new StringBuffer();
-
-		int read;
-
-		char segmentTerminator = configuration.getSegmentTerminator();
-		char elementSeparator = configuration.getElementSeparator();
-		char subElementSeparator = configuration.getSubElementSeparator();
-
-		while ((read = reader.read()) != -1) {
-			char ch = (char) read;
-			if (ch == '\n') {
-				location.nextLine();
-			} else {
-				location.nextChar();
-			}
-
-			if (ch == elementSeparator || ch == segmentTerminator) {
-				startElement(segmentIdentifier, accumulator, location);
-				endElement(segmentIdentifier);
-
-				if (location.getElementIdentifier().equals(
-						ISA_SUBELEMENT_IDENTIFIER)) {
-					configuration.setSubElementSeparator(accumulator.charAt(0));
-				}
-
-				if (ch == segmentTerminator) {
-					// The caller will close the segment
-					return ch;
-				}
-
-				blank(accumulator);
-
-				continue;
-			}
-
-			// TODO(jkinner): Make this a flag after ISA is parsed instead of
-			// string comparison
-			if (!segmentIdentifier.equals("ISA") && ch == subElementSeparator) {
-				// Parse subElements until the end of the element
-				location.startElement();
-				startElement(segmentIdentifier, accumulator, location);
-				blank(accumulator);
-				char terminatorToken = parseSubElements(reader, configuration,
-						location);
-				endElement(segmentIdentifier);
-				location.endElement();
-
-				if (terminatorToken == segmentTerminator) {
-					return terminatorToken;
-				}
-
-				continue;
-			}
-
-			accumulator.append(ch);
-		}
-
-		throw new EOFException("Unexpected EOF when parsing element: "
-				+ accumulator.toString() + " (missing segment terminator '"
-				+ segmentTerminator + "' or element separator '"
-				+ elementSeparator + "')");
-	}
-
-	private void blank(StringBuffer accumulator) {
-		accumulator.delete(0, accumulator.length());
-	}
-
-	private void startElement(String segmentIdentifier,
-			StringBuffer accumulator, Location location)
-			throws SAXException {
-		location.startElement();
-		contentHandler.startElement(NAMESPACE_URI, ELEMENT_ELEMENT,
-				ELEMENT_ELEMENT, EMPTY_ATTRIBUTES);
-
-		ValueTransformer<String, String> transformer = ediValueTransformers
-				.get(location.getElementIdentifier());
-		String value = accumulator.toString();
-		if (transformer != null) {
-			value = transformer.transform(value);
-		}
-
-		char[] accumulatorChars = value.toCharArray();
-		if (accumulatorChars.length > 0) {
-			contentHandler.characters(accumulatorChars, 0,
-					accumulatorChars.length);
-		}
-	}
-
-	private void endElement(String segmentIdentifier) throws SAXException {
-		contentHandler.endElement(NAMESPACE_URI, ELEMENT_ELEMENT,
-				ELEMENT_ELEMENT);
-	}
-
-	protected char parseSubElements(Reader is, Configuration configuration,
-			Location location) throws IOException, SAXException {
-		StringBuffer accumulator = new StringBuffer();
-
-		int read;
-		int fieldCount = 0;
-
-		char elementSeparator = configuration.getElementSeparator();
-		char segmentTerminator = configuration.getSegmentTerminator();
-		char subElementSeparator = configuration.getSubElementSeparator();
-
-		while ((read = is.read()) != -1) {
-			char ch = (char) read;
-
-			if (ch == '\n') {
-				location.nextLine();
-			} else {
-				location.nextChar();
-			}
-
-			if (ch == elementSeparator || ch == segmentTerminator) {
-				// The caller will close the segment
-				// Flush the accumulator
-				location.startSubElement();
-				emitSubElement(accumulator, location.getElementIdentifier());
-				return ch;
-			}
-
-			if (ch == subElementSeparator) {
-				location.startSubElement();
-				emitSubElement(accumulator, location.getElementIdentifier());
-				blank(accumulator);
-
-				continue;
-			}
-
-			accumulator.append(ch);
-		}
-
-		throw new EOFException("Unexpected EOF when parsing sub-element: "
-				+ accumulator.toString());
-	}
-
-	private void emitSubElement(StringBuffer accumulator,
-			ImmutableEdiElementIdentifier elementId) throws SAXException {
-		contentHandler.startElement(NAMESPACE_URI, SUBELEMENT_ELEMENT,
-				SUBELEMENT_ELEMENT, EMPTY_ATTRIBUTES);
-		ValueTransformer<String, String> transformer = ediValueTransformers
-				.get(elementId);
-		String value = accumulator.toString();
-		if (transformer != null) {
-			value = transformer.transform(value);
-		}
-		char[] accumulatorChars = value.toCharArray();
-		contentHandler.characters(accumulatorChars, 0, accumulatorChars.length);
-		contentHandler.endElement(NAMESPACE_URI, SUBELEMENT_ELEMENT,
-				SUBELEMENT_ELEMENT);
 	}
 
 	public void setContentHandler(ContentHandler contentHandler) {
@@ -680,8 +477,7 @@ public class EdiReader implements XMLReader {
 		private int line;
 		private int character;
 		// This is always where we start parsing EDI
-		private EdiElementIdentifier elementId = new EdiElementIdentifier(
-				"ISA", 0);
+		private EdiLocation elementLocation = new EdiLocation("ISA", 0);
 
 		public Location() {
 		}
@@ -696,29 +492,29 @@ public class EdiReader implements XMLReader {
 		}
 
 		public void startSegment(String segment) {
-			elementId.setSegment(segment);
-			elementId.setElement(0);
-			elementId.clearSubElement();
+			elementLocation.setSegment(segment);
+			elementLocation.setElement(0);
+			elementLocation.clearSubElement();
 		}
 
 		public void startElement() {
-			elementId.nextElement();
+			elementLocation.nextElement();
 		}
 
 		public void endElement() {
-			elementId.clearSubElement();
+			elementLocation.clearSubElement();
 		}
 
 		public void startSubElement() {
-			if (elementId.hasSubElement()) {
-				elementId.nextSubElement();
+			if (elementLocation.hasSubElement()) {
+				elementLocation.nextSubElement();
 			} else {
-				elementId.setSubElement(0);
+				elementLocation.setSubElement(0);
 			}
 		}
 
-		public ImmutableEdiElementIdentifier getElementIdentifier() {
-			return elementId;
+		public ImmutableEdiLocation getEdiLocation() {
+			return elementLocation;
 		}
 
 		@Override
@@ -726,16 +522,16 @@ public class EdiReader implements XMLReader {
 			StringBuffer locationBuffer = new StringBuffer();
 			locationBuffer.append("line ").append(line).append(", character ")
 					.append(character).append(", segment ")
-					.append(elementId.getSegment());
-			if (elementId.getIndex() > 0) {
+					.append(elementLocation.getSegment());
+			if (elementLocation.getIndex() > 0) {
 				locationBuffer.append(", element ")
-						.append(elementId.getIndex());
+						.append(elementLocation.getIndex());
 			}
-			if (elementId.hasSubElement()) {
+			if (elementLocation.hasSubElement()) {
 				locationBuffer.append("subelement ").append(
-						elementId.getSubElement());
+						elementLocation.getSubElement());
 			}
-			String wellKnownName = wellKnownElements.get(elementId);
+			String wellKnownName = wellKnownElements.get(elementLocation);
 			if (wellKnownName != null) {
 				locationBuffer.append(" ('").append(wellKnownName).append("')");
 			}
