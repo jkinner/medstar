@@ -96,23 +96,15 @@ public class EdiReader implements XMLReader, EdiConstants {
 
 	/** For a given EDI element, what its well-known identifier is. */
 	private static final Map<ImmutableEdiLocation, String> wellKnownElements = ImmutableMap
-			.<ImmutableEdiLocation, String> builder()
-			.put(ImmutableEdiLocation.of("ISA", 2),
-					"authorizationInformation")
-			.put(ImmutableEdiLocation.of("ISA", 3),
-					"securityInformationQualifier")
-			.put(ImmutableEdiLocation.of("ISA", 5),
-					"interchangeSenderIdQualifier")
-			.put(ImmutableEdiLocation.of("ISA", 6),
-					"interchangeSenderId")
-			.put(ImmutableEdiLocation.of("ISA", 7),
-					"interchangeReceiverIdQualifier")
-			.put(ImmutableEdiLocation.of("ISA", 8),
-					"interchangeReceiverId")
-			.put(ImmutableEdiLocation.of("ISA", 14),
-					"acknowledgementRequested")
-			.put(ImmutableEdiLocation.of("ISA", 16),
-					"subElementSeparator").build();
+		.<ImmutableEdiLocation, String> builder()
+			.put(ImmutableEdiLocation.of("ISA", 2), "authorizationInformation")
+			.put(ImmutableEdiLocation.of("ISA", 3), "securityInformationQualifier")
+			.put(ImmutableEdiLocation.of("ISA", 5), "interchangeSenderIdQualifier")
+			.put(ImmutableEdiLocation.of("ISA", 6), "interchangeSenderId")
+			.put(ImmutableEdiLocation.of("ISA", 7), "interchangeReceiverIdQualifier")
+			.put(ImmutableEdiLocation.of("ISA", 8), "interchangeReceiverId")
+			.put(ImmutableEdiLocation.of("ISA", 14), "acknowledgementRequested")
+			.put(ImmutableEdiLocation.of("ISA", 16), "subElementSeparator").build();
 
 	public ContentHandler getContentHandler() {
 		return contentHandler;
@@ -185,7 +177,7 @@ public class EdiReader implements XMLReader, EdiConstants {
 		contentHandler.startDocument();
 		contentHandler.startPrefixMapping("", NAMESPACE_URI);
 
-		// TODO(jkinner): Fill in ANSI X12 version info?
+		// TODO(jkinner): Fill in ASC X12 version info?
 		contentHandler.startElement(NAMESPACE_URI, "edi", "edi",
 				EMPTY_ATTRIBUTES);
 		
