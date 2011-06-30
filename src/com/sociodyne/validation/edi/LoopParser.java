@@ -7,7 +7,6 @@ import com.sociodyne.validation.edi.EdiReader.Location;
 import java.io.IOException;
 import java.io.Reader;
 
-import javax.annotation.Nullable;
 import javax.xml.namespace.QName;
 
 import org.xml.sax.ContentHandler;
@@ -16,18 +15,19 @@ import org.xml.sax.SAXException;
 import com.google.inject.Inject;
 import com.google.inject.assistedinject.Assisted;
 
-public class HLParser extends ElementParser {
-	private static final String BLOCK_ELEMENT = "block";
-	private static final String CODE_ATTRIBUTE = "code";
+public class LoopParser extends ElementParser {
+	private static final String LOOP_ELEMENT = "loop";
+	private static final String TYPE_ATTRIBUTE = "type";
 
 	private ParserFactory<SegmentParser> segmentParserFactory;
 
-	HLInfo info = new HLInfo();
+	LoopInfo info = new LoopInfo();
 
 	@Inject
-	HLParser(@Assisted Reader reader, @Assisted Configuration configuration,
+	LoopParser(@Assisted Reader reader, @Assisted Configuration configuration,
 			@Assisted Location location, @Assisted ContentHandler contentHandler,
-			EdiReader.Context context, ParserFactory<SegmentParser> segmentParserFactory,
+			EdiReader.Context context,
+			ParserFactory<SegmentParser> segmentParserFactory,
 			ParserFactory<NoSubElementsParser> noSubElementsParserFactory) {
 		super(reader, configuration, location, contentHandler, context);
 		this.segmentParserFactory = segmentParserFactory;
@@ -40,24 +40,13 @@ public class HLParser extends ElementParser {
 		location.startElement();
 		switch (location.getEdiLocation().getIndex()) {
 			case 1:
-				info.thisLevel = Integer.parseInt(accumulator.toString());
-				break;
-			case 2:
-				if (accumulator.length() > 0) {
-					info.parentLevel = Integer.parseInt(accumulator.toString());
-				}
-				break;
-			case 3:
 				info.code = Integer.parseInt(accumulator.toString());
-				break;
-			case 4:
-				info.hasChildNode = Integer.parseInt(accumulator.toString()) != 0;
-				// Descend, parsing new segments
-				startBlock(info.code, location);
+				startLoop(info.code, location);
 				SegmentParser parser = segmentParserFactory.create(reader, configuration,
 						contentHandler, location);
+				// Loops parse recursively until a LE (LoopEnd) is encountered. That parser
+				// will end the loop.
 				parser.parse();
-				endBlock();
 				break;
 			default:
 				throw new SAXException("Unknown HL element: "
@@ -65,17 +54,17 @@ public class HLParser extends ElementParser {
 		}
 	}
 
-	protected void startBlock(int code, Location location)
+	protected void startLoop(int code, Location location)
 			throws SAXException {
 		location.startElement();
 		EdiAttributes attributes = new EdiAttributes();
-		attributes.put(new QName("", CODE_ATTRIBUTE, ""), Integer.toString(code));
-		contentHandler.startElement(EdiConstants.NAMESPACE_URI, BLOCK_ELEMENT,
-				BLOCK_ELEMENT, attributes);
+		attributes.put(new QName("", TYPE_ATTRIBUTE, ""), Integer.toString(code));
+		contentHandler.startElement(EdiConstants.NAMESPACE_URI, LOOP_ELEMENT,
+				LOOP_ELEMENT, attributes);
 	}
 
-	protected void endBlock() throws SAXException {
-		contentHandler.endElement(EdiConstants.NAMESPACE_URI, BLOCK_ELEMENT, BLOCK_ELEMENT);
+	protected void endLoop() throws SAXException {
+		contentHandler.endElement(EdiConstants.NAMESPACE_URI, LOOP_ELEMENT, LOOP_ELEMENT);
 	}
 
 	@Override
@@ -83,14 +72,8 @@ public class HLParser extends ElementParser {
 		location.endElement();
 	}
 
-	static class HLInfo {
-		/* HL01 */
-		int thisLevel;
-		/* HL02 */
-		@Nullable Integer parentLevel;
-		/* HL03 */
+	static class LoopInfo {
+		/* LS01 */
 		int code;
-		/* HL04 */
-		boolean hasChildNode;
 	}
 }

@@ -49,7 +49,7 @@ public class SegmentParserTest extends MockEdiParserTest {
 	private SegmentParser createSegmentParser(Reader reader) {
 		SegmentParser segmentParser =
 			new SegmentParser(reader,
-				configuration, location, contentHandler,
+				configuration, location, contentHandler, new EdiReader.Context(),
 				ImmutableMap.<String, ParserFactory<? extends ElementParser>>of(),
 				elementParserFactory);
 		return segmentParser;

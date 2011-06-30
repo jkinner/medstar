@@ -1,6 +1,7 @@
 package com.sociodyne.validation.edi;
 
 import com.sociodyne.validation.edi.EdiReader.Configuration;
+import com.sociodyne.validation.edi.EdiReader.Context;
 import com.sociodyne.validation.edi.EdiReader.Location;
 
 import java.io.EOFException;
@@ -18,6 +19,7 @@ import com.google.inject.assistedinject.Assisted;
 class ElementParser extends Parser {
 	protected ContentHandler contentHandler;
 	private SubElementParser subElementParser;
+	private final EdiReader.Context context;
 
 	/** The ISA sub-element identifier location. */
 	private static final ImmutableEdiLocation ISA_SUBELEMENT_IDENTIFIER =
@@ -32,11 +34,13 @@ class ElementParser extends Parser {
 	@Inject
 	ElementParser(@Assisted Reader reader, @Assisted Configuration configuration,
 			@Assisted Location location, @Assisted ContentHandler contentHandler,
+			EdiReader.Context context,
 			ParserFactory<SubElementParser> subElementParserFactory) {
 		super(reader, configuration, location);
 		this.contentHandler = contentHandler;
 		this.subElementParser = subElementParserFactory.create(reader, configuration,
 				contentHandler, location);
+		this.context = context;
 	}
 
 	/**
@@ -46,9 +50,10 @@ class ElementParser extends Parser {
 	 * Any class that uses this ctor must call setSubElementParserFactory() in its ctor.
 	 */
 	protected ElementParser(Reader reader, Configuration configuration,
-			Location location, ContentHandler contentHandler) {
+			Location location, ContentHandler contentHandler, EdiReader.Context context) {
 		super(reader, configuration, location);
 		this.contentHandler = contentHandler;
+		this.context = context;
 	}
 
 	protected void setSubElementParserFactory(
@@ -79,8 +84,9 @@ class ElementParser extends Parser {
 
 		// TODO(jkinner): Make this a flag after ISA is parsed instead of
 		// string comparison
-		if (ch == configuration.getSubElementSeparator()) {
-			if (! location.getEdiLocation().getSegment().equals("ISA")) {
+		if (context.hasParsedIsa) {
+			// The configuration isn't valid until the ISA has been parsed
+			if (ch == configuration.getSubElementSeparator()) {
 				// Parse subElements until the end of the element
 				location.startElement();
 				startElement(accumulator, location);
@@ -95,8 +101,6 @@ class ElementParser extends Parser {
 				}
 	
 				return null;
-			} else {
-				throw new SAXException("Sub-element separator not permitted in ISA segment");
 			}
 		}
 

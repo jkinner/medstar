@@ -42,7 +42,7 @@ public class ElementParserTest extends MockEdiParserTest {
 		replay();
 		Reader reader = new InputStreamReader(new ByteArrayInputStream(SHORT_ISA_ELEMENTS.getBytes()));
 		ElementParser parser = new ElementParser(reader, configuration, location,
-				contentHandler, subElementParserFactory);
+				contentHandler, new EdiReader.Context(), subElementParserFactory);
 		parser.parse();
 	}
 
@@ -59,7 +59,7 @@ public class ElementParserTest extends MockEdiParserTest {
 		replay();
 		
 		ElementParser parser = new ElementParser(reader, configuration, location,
-				contentHandler, subElementParserFactory);
+				contentHandler, new EdiReader.Context(), subElementParserFactory);
 		parser.parse();
 		assertEquals(':', configuration.getSubElementSeparator());
 	}

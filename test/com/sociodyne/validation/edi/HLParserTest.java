@@ -56,7 +56,7 @@ public class HLParserTest extends MockEdiParserTest {
 		replay();
 		
 		HLParser hlParser = new HLParser(reader, configuration, location, contentHandler,
-				segmentParserFactory, noSubElementsParserFactory);
+				new EdiReader.Context(), segmentParserFactory, noSubElementsParserFactory);
 		hlParser.parse();
 
 		assertEquals(1, hlParser.info.thisLevel);
@@ -77,7 +77,7 @@ public class HLParserTest extends MockEdiParserTest {
 		replay();
 		
 		HLParser hlParser = new HLParser(reader, configuration, location, contentHandler,
-				segmentParserFactory, noSubElementsParserFactory);
+				new EdiReader.Context(), segmentParserFactory, noSubElementsParserFactory);
 		hlParser.parse();
 
 		assertEquals(1, hlParser.info.thisLevel);

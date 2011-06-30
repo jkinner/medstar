@@ -32,12 +32,16 @@ public class SegmentParser extends Parser {
 
 	private Map<String, ElementParser> elementParsers = Maps.newHashMap();
 
+	private EdiReader.Context context;
+
 	@Inject
 	SegmentParser(@Assisted Reader reader, @Assisted Configuration configuration,
-			@Assisted Location location, @Assisted ContentHandler contentHandler, 
+			@Assisted Location location, @Assisted ContentHandler contentHandler,
+			EdiReader.Context context,
 			Map<String, ParserFactory<? extends ElementParser>> elementParserFactories,
 			ParserFactory<ElementParser> defaultElementParserFactory) {
 		super(reader, configuration, location);
+		this.context = context;
 		this.contentHandler = contentHandler;
 		this.defaultElementParser = defaultElementParserFactory.create(reader, configuration,
 				contentHandler, location);
@@ -114,6 +118,10 @@ public class SegmentParser extends Parser {
 				}
 				
 				if (customElementParser == null) {
+					// Check to see if we parsed ISA
+					if (! context.hasParsedIsa && segmentIdentifier.equals("ISA")) {
+						context.hasParsedIsa = true;
+					}
 					// If a descenderFactory was found, it was responsible for rendering the segment
 					endSegment(segmentIdentifier);
 				}

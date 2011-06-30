@@ -94,6 +94,13 @@ public class EdiReader implements XMLReader, EdiConstants {
 	/** Value of the {@link #NAMESPACE_PREFIXES_FEATURE} feature. */
 	private boolean useNamespacePrefixes = false;
 
+	private static final ThreadLocal<Context> context = new ThreadLocal<Context>() {
+		@Override
+		protected Context initialValue() {
+			return new Context();
+		}
+	};
+
 	/** For a given EDI element, what its well-known identifier is. */
 	private static final Map<ImmutableEdiLocation, String> wellKnownElements = ImmutableMap
 		.<ImmutableEdiLocation, String> builder()
@@ -183,6 +190,8 @@ public class EdiReader implements XMLReader, EdiConstants {
 		contentHandler.startPrefixMapping("", NAMESPACE_URI);
 
 		// TODO(jkinner): Fill in ASC X12 version info?
+		EdiAttributes documentAttributes = new EdiAttributes();
+		documentAttributes.put(new QName(XML_NAMESPACE_URI, "space", "xml:space"), "preserve");
 		contentHandler.startElement(NAMESPACE_URI, "edi", "edi",
 				EMPTY_ATTRIBUTES);
 		
@@ -192,6 +201,7 @@ public class EdiReader implements XMLReader, EdiConstants {
 		// TODO(jkinner): Use worker threads to do parsing; from here down, the operations are
 		// thread-safe.
 		try {
+			context.set(new Context());
 			// Simple recursive-descent parser
 			segmentParser.parse();
 		} catch (SAXException e) {
@@ -203,6 +213,8 @@ public class EdiReader implements XMLReader, EdiConstants {
 			throw wrapThrowable(e, location);
 		} catch (Throwable t) {
 			throw new RuntimeException(wrapThrowable(t, location));
+		} finally {
+			context.remove();
 		}
 
 		contentHandler.endElement(NAMESPACE_URI, "edi", "edi");
@@ -633,5 +645,13 @@ public class EdiReader implements XMLReader, EdiConstants {
 		public static EdiReader create() {
 			return ediReaderInjector.getInstance(EdiReader.class);
 		}
+	}
+	
+	static class Context {
+		boolean hasParsedIsa = false;
+	}
+
+	static Context getContext() {
+		return context.get();
 	}
 }
