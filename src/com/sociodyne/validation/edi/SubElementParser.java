@@ -6,25 +6,25 @@ import com.sociodyne.validation.edi.EdiReader.Location;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.Reader;
-import java.util.Map;
 
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
+
 class SubElementParser extends Parser {
 	ContentHandler contentHandler;
-	Map<ImmutableEdiLocation, ValueTransformer<String, String>> ediValueTransformers;
 
 	/** The XML element name for a sub-element. */
 	private static final String SUBELEMENT_ELEMENT = "subelement";
 	
 
-	protected SubElementParser(Reader reader, Configuration configuration, Location location,
-			ContentHandler contentHandler,
-			Map<ImmutableEdiLocation, ValueTransformer<String, String>> ediValueTransformers) {
+	@Inject
+	SubElementParser(@Assisted Reader reader, @Assisted Configuration configuration,
+			@Assisted Location location, @Assisted ContentHandler contentHandler) {
 		super(reader, configuration, location);
 		this.contentHandler = contentHandler;
-		this.ediValueTransformers = ediValueTransformers;
 	}
 
 	@Override
@@ -35,13 +35,13 @@ class SubElementParser extends Parser {
 			// The caller will close the segment
 			// Flush the accumulator
 			location.startSubElement();
-			emitSubElement(accumulator, location.getEdiLocation());
+			startStopSubElement(accumulator, location.getEdiLocation());
 			return ch;
 		}
 
 		if (ch == configuration.getSubElementSeparator()) {
 			location.startSubElement();
-			emitSubElement(accumulator, location.getEdiLocation());
+			startStopSubElement(accumulator, location.getEdiLocation());
 			blank(accumulator);
 
 			return null;
@@ -62,16 +62,11 @@ class SubElementParser extends Parser {
 		
 	}
 
-	private void emitSubElement(StringBuffer accumulator,
-			ImmutableEdiLocation elementId) throws SAXException {
+	private void startStopSubElement(StringBuffer accumulator,
+			ImmutableEdiLocation elementId) throws IOException, SAXException {
 		contentHandler.startElement(EdiConstants.NAMESPACE_URI, SUBELEMENT_ELEMENT,
 				SUBELEMENT_ELEMENT, EdiReader.EMPTY_ATTRIBUTES);
-		ValueTransformer<String, String> transformer = ediValueTransformers
-				.get(elementId);
 		String value = accumulator.toString();
-		if (transformer != null) {
-			value = transformer.transform(value);
-		}
 		char[] accumulatorChars = value.toCharArray();
 		contentHandler.characters(accumulatorChars, 0, accumulatorChars.length);
 		contentHandler.endElement(EdiConstants.NAMESPACE_URI, SUBELEMENT_ELEMENT,

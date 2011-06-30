@@ -10,7 +10,7 @@ import javax.annotation.Nullable;
 
 import org.xml.sax.SAXException;
 
-abstract class Parser {
+public abstract class Parser {
 	protected StringBuffer accumulator = new StringBuffer();
 	protected Configuration configuration;
 	protected Location location;

@@ -1,20 +1,15 @@
 package com.sociodyne.validation.edi;
 
-import static org.easymock.EasyMock.anyObject;
-import static org.easymock.EasyMock.aryEq;
-import static org.easymock.EasyMock.eq;
-
-import com.sociodyne.test.Mock;
-import com.sociodyne.test.MockTest;
+import static org.easymock.EasyMock.*;
 
 import java.io.ByteArrayInputStream;
 
-import javax.xml.namespace.QName;
-
 import org.xml.sax.Attributes;
-import org.xml.sax.ContentHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 
 public class EdiReaderTest extends MockEdiParserTest {
 	// Note that these examples overide the default setting of '|' for the sub-element separator
@@ -23,9 +18,19 @@ public class EdiReaderTest extends MockEdiParserTest {
 		 + "050516*0734*U*00401*000005014*1*P*:~";
 	private static final String SHORT_ISA_HEADER =
 		"ISA****************:~";
+	Injector ediReaderInjector;
+	EdiReader reader;
+
+	public void setUp() throws Exception {
+		super.setUp();
+		ediReaderInjector = Guice.createInjector(new EdiReaderModule());
+		reader = ediReaderInjector.getInstance(EdiReader.class);
+	}
 
 	public void testParseShortIsaSegment_succeeds() throws Exception {
-		EdiReader reader = new EdiReader();
+		Injector ediReaderInjector = Guice.createInjector(new EdiReaderModule());
+		EdiReader reader = ediReaderInjector.getInstance(EdiReader.class);
+
 		ByteArrayInputStream is = new ByteArrayInputStream(
 			SHORT_ISA_HEADER.getBytes());
 		contentHandler.startDocument();
@@ -65,7 +70,6 @@ public class EdiReaderTest extends MockEdiParserTest {
 	}
 
 	public void testParseRealIsaSegment_succeeds() throws Exception {
-		EdiReader reader = new EdiReader();
 		ByteArrayInputStream is = new ByteArrayInputStream(
 			VALID_ISA_HEADER.getBytes());
 		contentHandler.startDocument();
@@ -92,7 +96,6 @@ public class EdiReaderTest extends MockEdiParserTest {
 	}
 
 	public void testParseSegment_withSubElements_succeeds() throws Exception {
-		EdiReader reader = new EdiReader();
 		ByteArrayInputStream is = new ByteArrayInputStream(
 			(SHORT_ISA_HEADER + "EB*D*IND**MB*********HC:G0389~").getBytes());
 		contentHandler.startDocument();

@@ -25,8 +25,12 @@ import org.xml.sax.SAXNotSupportedException;
 import org.xml.sax.XMLReader;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Objects;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
+import com.google.inject.Guice;
+import com.google.inject.Inject;
+import com.google.inject.Injector;
 
 /**
  * Writes the EDI contents into a simple XML representation. The parser emits
@@ -90,10 +94,6 @@ public class EdiReader implements XMLReader, EdiConstants {
 	/** Value of the {@link #NAMESPACE_PREFIXES_FEATURE} feature. */
 	private boolean useNamespacePrefixes = false;
 
-	/** For a given EDI element, how its value should be transformed when converting to XML. */
-	private static final Map<ImmutableEdiLocation, ValueTransformer<String, String>>
-		ediValueTransformers = ImmutableMap.of();
-
 	/** For a given EDI element, what its well-known identifier is. */
 	private static final Map<ImmutableEdiLocation, String> wellKnownElements = ImmutableMap
 		.<ImmutableEdiLocation, String> builder()
@@ -105,6 +105,13 @@ public class EdiReader implements XMLReader, EdiConstants {
 			.put(ImmutableEdiLocation.of("ISA", 8), "interchangeReceiverId")
 			.put(ImmutableEdiLocation.of("ISA", 14), "acknowledgementRequested")
 			.put(ImmutableEdiLocation.of("ISA", 16), "subElementSeparator").build();
+
+	private final ParserFactory<SegmentParser> segmentParserFactory;
+
+	@Inject
+	EdiReader(ParserFactory<SegmentParser> segmentParserFactory) {
+		this.segmentParserFactory = segmentParserFactory;
+	}
 
 	public ContentHandler getContentHandler() {
 		return contentHandler;
@@ -163,8 +170,6 @@ public class EdiReader implements XMLReader, EdiConstants {
 	}
 
 	protected void parseReader(Reader reader) throws IOException, SAXException {
-		// Build a configuration in a thread-safe way so multiple threads can
-		// use the same parser instance.
 		Configuration configuration;
 		Location location = new Location();
 		location.nextLine();
@@ -181,14 +186,11 @@ public class EdiReader implements XMLReader, EdiConstants {
 		contentHandler.startElement(NAMESPACE_URI, "edi", "edi",
 				EMPTY_ATTRIBUTES);
 		
-		// Configure the recursive-descent parsers
-		SubElementParser subElementParser = new SubElementParser(reader, configuration, location,
-				contentHandler, ediValueTransformers);
-		ElementParser elementParser = new ElementParser(reader, configuration, location,
-				contentHandler, subElementParser, ediValueTransformers);
-		SegmentParser segmentParser = new SegmentParser(reader, configuration, location,
-				contentHandler, elementParser);
+		SegmentParser segmentParser = segmentParserFactory.create(reader, configuration,
+				contentHandler, location);
 
+		// TODO(jkinner): Use worker threads to do parsing; from here down, the operations are
+		// thread-safe.
 		try {
 			// Simple recursive-descent parser
 			segmentParser.parse();
@@ -401,6 +403,40 @@ public class EdiReader implements XMLReader, EdiConstants {
 
 			return null;
 		}
+
+		// NOTE: These implementations are horribly inefficient; they are used for testing.
+		public boolean equals(Object o) {
+			// TODO(jkinner): Should order count?
+			if (this == o) { return true; }
+			if (o instanceof EdiAttributes) {
+				EdiAttributes that = (EdiAttributes) o;
+				if (size() == that.size()) {
+					// Given that the sizes are equal, check each entry in this map with the other
+					for (Map.Entry<QName, String> entry : entrySet()) {
+						String value = entry.getValue();
+						if (! Objects.equal(value, that.get(entry.getKey()))) {
+							return false;
+						}
+					}
+
+					// Every entry has been verified
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+		public int hashCode() {
+			Object[] hashCodeParams = new Object[size() * 2];
+			int i = 0;
+			for (Map.Entry<QName, String> entry : entrySet()) {
+				hashCodeParams[i] = entry.getKey();
+				hashCodeParams[i+1] = entry.getValue();
+				i += 2;
+			}
+			return Objects.hashCode(hashCodeParams);
+		}
 	}
 
 	public static class Configuration {
@@ -589,5 +625,13 @@ public class EdiReader implements XMLReader, EdiConstants {
 		}
 
 		return wrapped == null ? throwable : wrapped;
+	}
+
+	public static class Factory {
+		private static Injector ediReaderInjector = Guice.createInjector(new EdiReaderModule());
+
+		public static EdiReader create() {
+			return ediReaderInjector.getInstance(EdiReader.class);
+		}
 	}
 }

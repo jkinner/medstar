@@ -11,10 +11,13 @@ import java.util.Map;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.SAXException;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.inject.Inject;
+import com.google.inject.assistedinject.Assisted;
+
 class ElementParser extends Parser {
-	private ContentHandler contentHandler;
+	protected ContentHandler contentHandler;
 	private SubElementParser subElementParser;
-	private Map<ImmutableEdiLocation, ValueTransformer<String, String>> ediValueTransformers;
 
 	/** The ISA sub-element identifier location. */
 	private static final ImmutableEdiLocation ISA_SUBELEMENT_IDENTIFIER =
@@ -23,13 +26,35 @@ class ElementParser extends Parser {
 	/** The XML element name for an element. */
 	private static final String ELEMENT_ELEMENT = "element";
 
-	public ElementParser(Reader reader, Configuration configuration, Location location,
-			ContentHandler contentHandler, SubElementParser subElementParser,
-			Map<ImmutableEdiLocation, ValueTransformer<String, String>> ediValueTransformers) {
+	public static final Map<ImmutableEdiLocation, ValueTransformer<String, String>>
+		EMPTY_TRANSFORMERS = ImmutableMap.<ImmutableEdiLocation, ValueTransformer<String, String>>of();
+
+	@Inject
+	ElementParser(@Assisted Reader reader, @Assisted Configuration configuration,
+			@Assisted Location location, @Assisted ContentHandler contentHandler,
+			ParserFactory<SubElementParser> subElementParserFactory) {
 		super(reader, configuration, location);
 		this.contentHandler = contentHandler;
-		this.subElementParser = subElementParser;
-		this.ediValueTransformers = ediValueTransformers;
+		this.subElementParser = subElementParserFactory.create(reader, configuration,
+				contentHandler, location);
+	}
+
+	/**
+	 * Private ctor, used ONLY by sub-classes that use a differe sub-element parser type
+	 * (most notably {@link NoSubElementsParser}).
+	 * <p>
+	 * Any class that uses this ctor must call setSubElementParserFactory() in its ctor.
+	 */
+	protected ElementParser(Reader reader, Configuration configuration,
+			Location location, ContentHandler contentHandler) {
+		super(reader, configuration, location);
+		this.contentHandler = contentHandler;
+	}
+
+	protected void setSubElementParserFactory(
+			ParserFactory<? extends SubElementParser> subElementParserFactory) {
+		this.subElementParser = subElementParserFactory.create(reader, configuration,
+				contentHandler, location);
 	}
 
 	protected Character handleCharacter(char ch) throws IOException, SAXException {
@@ -38,8 +63,7 @@ class ElementParser extends Parser {
 			startElement(accumulator, location);
 			endElement();
 
-			if (location.getEdiLocation().equals(
-					ISA_SUBELEMENT_IDENTIFIER)) {
+			if (location.getEdiLocation().equals(ISA_SUBELEMENT_IDENTIFIER)) {
 				configuration.setSubElementSeparator(accumulator.charAt(0));
 			}
 
@@ -93,28 +117,41 @@ class ElementParser extends Parser {
 
 	}
 
-	private void startElement(
+	protected void startElement(
 			StringBuffer accumulator, Location location)
-			throws SAXException {
+			throws IOException, SAXException {
 		location.startElement();
 		contentHandler.startElement(EdiConstants.NAMESPACE_URI, ELEMENT_ELEMENT,
 				ELEMENT_ELEMENT, EdiReader.EMPTY_ATTRIBUTES);
 
-		ValueTransformer<String, String> transformer = ediValueTransformers
-				.get(location.getEdiLocation());
 		String value = accumulator.toString();
-		if (transformer != null) {
-			value = transformer.transform(value);
-		}
-
 		char[] accumulatorChars = value.toCharArray();
 		if (accumulatorChars.length > 0) {
-			contentHandler.characters(accumulatorChars, 0,
-					accumulatorChars.length);
+			contentHandler.characters(accumulatorChars, 0, accumulatorChars.length);
 		}
 	}
 
-	private void endElement() throws SAXException {
+	protected void endElement() throws SAXException {
 		contentHandler.endElement(EdiConstants.NAMESPACE_URI, ELEMENT_ELEMENT, ELEMENT_ELEMENT);
+	}
+
+	static class NoSubElementsParser extends SubElementParser {
+
+		@Inject
+		NoSubElementsParser(@Assisted Reader reader, @Assisted Configuration configuration,
+				@Assisted Location location, @Assisted ContentHandler contentHandler) {
+			super(reader, configuration, location, contentHandler);
+		}
+
+		@Override
+		protected Character handleCharacter(char ch) throws IOException,
+				SAXException {
+			throw new SAXException("Unexpected sub-element");
+		}
+
+		@Override
+		protected void handleTerminalToken(Character ch) throws IOException,
+				SAXException {
+		}
 	}
 }

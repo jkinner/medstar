@@ -1,6 +1,8 @@
 package com.sociodyne.validation.edi;
 
 import com.sociodyne.test.Mock;
+import com.sociodyne.validation.edi.EdiReader.Configuration;
+import com.sociodyne.validation.edi.EdiReader.Location;
 
 import static org.easymock.EasyMock.*;
 
@@ -9,19 +11,27 @@ import java.io.EOFException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 
+import org.xml.sax.ContentHandler;
+
+import com.google.common.collect.ImmutableMap;
+
 public class SegmentParserTest extends MockEdiParserTest {
 	@Mock(Mock.Type.NICE) ElementParser elementParser;
+	@Mock(Mock.Type.NICE) ParserFactory<ElementParser> elementParserFactory;
 
 	// Elements are all removed; element separator token is to trigger
 	// recursive descent.
 	private static final String SHORT_ISA_HEADER =
 		"ISA*~";
-	private static final String ISA_HEADER_WITH_SUBELEMENT =
-		"ISA****************:~";
+
+	public void setUp() throws Exception {
+		super.setUp();
+		expect(elementParserFactory.create(anyObject(Reader.class), anyObject(Configuration.class),
+				anyObject(ContentHandler.class), anyObject(Location.class)))
+				.andReturn(elementParser);
+	}
 
 	public void testParseIsaSegment() throws Exception {
-		EdiReader.Location location = new EdiReader.Location();
-		EdiReader.Configuration configuration = new EdiReader.Configuration();
 		Reader reader =
 			new InputStreamReader(new ByteArrayInputStream(SHORT_ISA_HEADER.getBytes()));
 		expectStartSegment("ISA");
@@ -32,34 +42,36 @@ public class SegmentParserTest extends MockEdiParserTest {
 
 		replay();
 		
-		SegmentParser segmentParser = new SegmentParser(reader, configuration, location,
-				contentHandler, elementParser);
+		SegmentParser segmentParser = createSegmentParser(reader);
 		segmentParser.parse();
 	}
 
+	private SegmentParser createSegmentParser(Reader reader) {
+		SegmentParser segmentParser =
+			new SegmentParser(reader,
+				configuration, location, contentHandler,
+				ImmutableMap.<String, ParserFactory<? extends ElementParser>>of(),
+				elementParserFactory);
+		return segmentParser;
+	}
+
 	public void testParseEmptySegment_succeeds() throws Exception {
-		EdiReader.Location location = new EdiReader.Location();
-		EdiReader.Configuration configuration = new EdiReader.Configuration();
 		Reader reader =
 			new InputStreamReader(new ByteArrayInputStream("".getBytes()));
 
 		replay();
 		
-		SegmentParser segmentParser = new SegmentParser(reader, configuration, location,
-				contentHandler, elementParser);
+		SegmentParser segmentParser = createSegmentParser(reader);
 		segmentParser.parse();
 	}
 
 	public void testParseIncompleteSegment_throwsEOFException() throws Exception {
-		EdiReader.Location location = new EdiReader.Location();
-		EdiReader.Configuration configuration = new EdiReader.Configuration();
 		Reader reader =
 			new InputStreamReader(new ByteArrayInputStream("ISA".getBytes()));
 
 		replay();
 		
-		SegmentParser segmentParser = new SegmentParser(reader, configuration, location,
-				contentHandler, elementParser);
+		SegmentParser segmentParser = createSegmentParser(reader);
 		try {
 			segmentParser.parse();
 			fail("Expected EOFException");
@@ -69,8 +81,6 @@ public class SegmentParserTest extends MockEdiParserTest {
 	}
 
 	public void testParseMultipleSegmentsNoElements_succeeds() throws Exception {
-		EdiReader.Location location = new EdiReader.Location();
-		EdiReader.Configuration configuration = new EdiReader.Configuration();
 		Reader reader =
 			new InputStreamReader(new ByteArrayInputStream("ISA~EB~".getBytes()));
 
@@ -81,14 +91,11 @@ public class SegmentParserTest extends MockEdiParserTest {
 		
 		replay();
 
-		SegmentParser segmentParser = new SegmentParser(reader, configuration, location,
-				contentHandler, elementParser);
+		SegmentParser segmentParser = createSegmentParser(reader);
 		segmentParser.parse();
 	}
 
 	public void testParseMultipleSegmentsWithElements_succeeds() throws Exception {
-		EdiReader.Location location = new EdiReader.Location();
-		EdiReader.Configuration configuration = new EdiReader.Configuration();
 		// Important: The segment terminators are "read" by the mock element parser
 		Reader reader =
 			new InputStreamReader(new ByteArrayInputStream("ISA*EB*".getBytes()));
@@ -102,8 +109,7 @@ public class SegmentParserTest extends MockEdiParserTest {
 		
 		replay();
 
-		SegmentParser segmentParser = new SegmentParser(reader, configuration, location,
-				contentHandler, elementParser);
+		SegmentParser segmentParser = createSegmentParser(reader);
 		segmentParser.parse();
 	}
 

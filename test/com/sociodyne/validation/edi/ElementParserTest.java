@@ -1,15 +1,16 @@
 package com.sociodyne.validation.edi;
 
-import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.*;
 
 import com.sociodyne.test.Mock;
+import com.sociodyne.validation.edi.EdiReader.Configuration;
+import com.sociodyne.validation.edi.EdiReader.Location;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.util.Map;
 
-import com.google.common.collect.ImmutableMap;
+import org.xml.sax.ContentHandler;
 
 public class ElementParserTest extends MockEdiParserTest {
 	private static final String SHORT_ISA_ELEMENTS =
@@ -17,15 +18,17 @@ public class ElementParserTest extends MockEdiParserTest {
 
 	EdiReader.Location location;
 	EdiReader.Configuration configuration;
-	private static final Map<ImmutableEdiLocation, ValueTransformer<String, String>>
-		EMPTY_TRANSFORMERS = ImmutableMap.<ImmutableEdiLocation, ValueTransformer<String, String>>of();
 
 	@Mock(Mock.Type.NICE) SubElementParser subElementParser;
-	
+	@Mock(Mock.Type.NICE) ParserFactory<SubElementParser> subElementParserFactory;
+
 	public void setUp() throws Exception {
 		super.setUp();
 		location = new EdiReader.Location();
 		configuration = new EdiReader.Configuration();
+		expect(subElementParserFactory.create(anyObject(Reader.class),
+				anyObject(Configuration.class), anyObject(ContentHandler.class),
+				anyObject(Location.class))).andReturn(subElementParser);
 	}
 
 	public void testParseShortIsaHeader_succeeds() throws Exception {
@@ -39,7 +42,7 @@ public class ElementParserTest extends MockEdiParserTest {
 		replay();
 		Reader reader = new InputStreamReader(new ByteArrayInputStream(SHORT_ISA_ELEMENTS.getBytes()));
 		ElementParser parser = new ElementParser(reader, configuration, location,
-				contentHandler, subElementParser, EMPTY_TRANSFORMERS);
+				contentHandler, subElementParserFactory);
 		parser.parse();
 	}
 
@@ -56,7 +59,7 @@ public class ElementParserTest extends MockEdiParserTest {
 		replay();
 		
 		ElementParser parser = new ElementParser(reader, configuration, location,
-				contentHandler, subElementParser, EMPTY_TRANSFORMERS);
+				contentHandler, subElementParserFactory);
 		parser.parse();
 		assertEquals(':', configuration.getSubElementSeparator());
 	}

@@ -4,15 +4,10 @@ import java.io.ByteArrayInputStream;
 import java.io.EOFException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.util.Map;
-
-import com.google.common.collect.ImmutableMap;
 
 public class SubElementParserTest extends MockEdiParserTest {
 	EdiReader.Location location;
 	EdiReader.Configuration configuration;
-	private static final Map<ImmutableEdiLocation, ValueTransformer<String, String>>
-		EMPTY_TRANSFORMERS = ImmutableMap.<ImmutableEdiLocation, ValueTransformer<String, String>>of();
 
 	public void setUp() throws Exception {
 		super.setUp();
@@ -27,7 +22,7 @@ public class SubElementParserTest extends MockEdiParserTest {
 		replay();
 		Reader reader = new InputStreamReader(new ByteArrayInputStream("*".getBytes()));
 		SubElementParser parser = new SubElementParser(reader, configuration, location,
-				contentHandler, EMPTY_TRANSFORMERS);
+				contentHandler);
 		assertEquals('*', (int)parser.parse());
 	}
 
@@ -35,7 +30,7 @@ public class SubElementParserTest extends MockEdiParserTest {
 		replay();
 		Reader reader = new InputStreamReader(new ByteArrayInputStream("".getBytes()));
 		SubElementParser parser = new SubElementParser(reader, configuration, location,
-				contentHandler, EMPTY_TRANSFORMERS);
+				contentHandler);
 		try {
 			parser.parse();
 			fail("Expected EOFException");
@@ -51,7 +46,7 @@ public class SubElementParserTest extends MockEdiParserTest {
 		replay();
 		Reader reader = new InputStreamReader(new ByteArrayInputStream("~".getBytes()));
 		SubElementParser parser = new SubElementParser(reader, configuration, location,
-				contentHandler, EMPTY_TRANSFORMERS);
+				contentHandler);
 		assertEquals('~', (int)parser.parse());
 	}
 
@@ -64,7 +59,7 @@ public class SubElementParserTest extends MockEdiParserTest {
 		replay();
 		Reader reader = new InputStreamReader(new ByteArrayInputStream("|*".getBytes()));
 		SubElementParser parser = new SubElementParser(reader, configuration, location,
-				contentHandler, EMPTY_TRANSFORMERS);
+				contentHandler);
 		assertEquals('*', (int)parser.parse());
 	}
 
@@ -78,7 +73,7 @@ public class SubElementParserTest extends MockEdiParserTest {
 		replay();
 		Reader reader = new InputStreamReader(new ByteArrayInputStream(":*".getBytes()));
 		SubElementParser parser = new SubElementParser(reader, configuration, location,
-				contentHandler, EMPTY_TRANSFORMERS);
+				contentHandler);
 		assertEquals('*', (int)parser.parse());
 	}
 }
