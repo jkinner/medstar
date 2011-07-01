@@ -191,9 +191,9 @@ public class EdiReader implements XMLReader, EdiConstants {
 
 		// TODO(jkinner): Fill in ASC X12 version info?
 		EdiAttributes documentAttributes = new EdiAttributes();
-		documentAttributes.put(new QName(XML_NAMESPACE_URI, "space", "xml:space"), "preserve");
+		documentAttributes.put(new QName(XML_NAMESPACE_URI, "space", "xml"), "preserve");
 		contentHandler.startElement(NAMESPACE_URI, "edi", "edi",
-				EMPTY_ATTRIBUTES);
+				documentAttributes);
 		
 		SegmentParser segmentParser = segmentParserFactory.create(reader, configuration,
 				contentHandler, location);
