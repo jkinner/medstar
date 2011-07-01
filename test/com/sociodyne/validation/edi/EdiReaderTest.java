@@ -2,6 +2,7 @@ package com.sociodyne.validation.edi;
 
 import static org.easymock.EasyMock.*;
 
+
 import java.io.ByteArrayInputStream;
 
 import org.xml.sax.Attributes;

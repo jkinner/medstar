@@ -1,5 +1,6 @@
 package com.sociodyne.validation.edi;
 
+
 import java.io.ByteArrayInputStream;
 import java.io.EOFException;
 import java.io.InputStreamReader;

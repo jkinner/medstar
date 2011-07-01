@@ -6,6 +6,8 @@ import static org.easymock.EasyMock.eq;
 
 import com.sociodyne.test.Mock;
 import com.sociodyne.test.MockTest;
+import com.sociodyne.validation.edi.EdiConstants;
+import com.sociodyne.validation.edi.EdiReader;
 import com.sociodyne.validation.edi.EdiReader.Configuration;
 import com.sociodyne.validation.edi.EdiReader.EdiAttributes;
 import com.sociodyne.validation.edi.EdiReader.Location;
