@@ -1,4 +1,6 @@
-package com.sociodyne.validation.edi;
+package com.sociodyne.parser.edi;
+
+import com.sociodyne.parser.Location;
 
 import javax.annotation.Nullable;
 
@@ -10,7 +12,7 @@ import com.google.common.base.Objects;
  * 
  * @author jkinner@sociodyne.com (Jason Kinenr)
  */
-public class ImmutableEdiLocation {
+public class ImmutableEdiLocation extends Location {
 	protected String segment;
 	protected int element;
 	@Nullable protected Integer subElement;
@@ -63,5 +65,23 @@ public class ImmutableEdiLocation {
 
 	public static ImmutableEdiLocation of(String segment, int element, int subElement) {
 		return new ImmutableEdiLocation(segment, element, subElement);
+	}
+
+	public static ImmutableEdiLocation copyOf(ImmutableEdiLocation location) {
+		return new ImmutableEdiLocation(location.segment, location.element, location.subElement);
+	}
+
+	@Override
+	public String toString() {
+		StringBuffer locationBuffer = new StringBuffer(super.toString());
+		locationBuffer.append(", segment ").append(segment);
+		if (element > 0) {
+			locationBuffer.append(", element ").append(element);
+		}
+		if (subElement != null) {
+			locationBuffer.append("subelement ").append(subElement);
+		}
+
+		return locationBuffer.toString();
 	}
 }

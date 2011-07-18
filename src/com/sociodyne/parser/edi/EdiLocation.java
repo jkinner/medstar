@@ -1,4 +1,4 @@
-package com.sociodyne.validation.edi;
+package com.sociodyne.parser.edi;
 
 public class EdiLocation extends ImmutableEdiLocation {
 
@@ -8,6 +8,32 @@ public class EdiLocation extends ImmutableEdiLocation {
 
 	public EdiLocation(String segment, int element, int subElement) {
 		super(segment, element, subElement);
+	}
+
+	public void startSegment(String segment) {
+		setSegment(segment);
+		setElement(0);
+		clearSubElement();
+	}
+
+	public void endSegment() {
+		clearSubElement();
+	}
+
+	public void startElement() {
+		nextElement();
+	}
+
+	public void endElement() {
+		clearSubElement();
+	}
+
+	public void startSubElement() {
+		if (hasSubElement()) {
+			nextSubElement();
+		} else {
+			setSubElement(0);
+		}
 	}
 
 	public void setSegment(String segment) {
@@ -31,6 +57,9 @@ public class EdiLocation extends ImmutableEdiLocation {
 	}
 
 	public void nextSubElement() {
+		if (subElement == null) {
+			setSubElement(0);
+		}
 		subElement++;
 	}
 
@@ -46,4 +75,11 @@ public class EdiLocation extends ImmutableEdiLocation {
 		return new EdiLocation(segment, element, subElement);
 	}
 
+	public static EdiLocation copyOf(ImmutableEdiLocation location) {
+		if (location.subElement == null) {
+			return new EdiLocation(location.segment, location.element);
+		} else {
+			return new EdiLocation(location.segment, location.element, location.subElement);
+		}
+	}
 }
