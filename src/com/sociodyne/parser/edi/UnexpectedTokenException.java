@@ -1,7 +1,7 @@
 package com.sociodyne.parser.edi;
 
 @SuppressWarnings("serial")
-public class UnexpectedTokenException extends ParseException {
+public class UnexpectedTokenException extends EdiException {
 	private Token actual;
 	private Token.Type[] expected;
 	private Token exact;

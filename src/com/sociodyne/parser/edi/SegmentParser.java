@@ -31,9 +31,9 @@ public class SegmentParser implements Parser {
 		return token.getType() == Token.Type.WORD;
 	}
 
-	public Token parse(Token startToken) throws ParseException, IOException {
+	public Token parse(Token startToken) throws EdiException, IOException {
 		if (!matches(startToken)) {
-			throw new ParseException("Unrecognized token " + startToken);
+			throw new EdiException("Unrecognized token " + startToken);
 		}
 
 		String segmentIdentifier = startToken.getValue();

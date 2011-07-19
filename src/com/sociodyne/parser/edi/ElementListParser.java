@@ -26,9 +26,9 @@ public class ElementListParser implements Parser {
 		return token.getType() == Token.Type.ELEMENT_SEPARATOR;
 	}
 
-	public Token parse(Token token) throws ParseException, IOException {
+	public Token parse(Token token) throws EdiException, IOException {
 		if (!matches(token)) {
-			throw new ParseException("Expected ELEMENT_SEPARATOR, found " + token);
+			throw new EdiException("Expected ELEMENT_SEPARATOR, found " + token);
 		}
 
 		while (true) {
@@ -63,7 +63,7 @@ public class ElementListParser implements Parser {
 						handler.endElement();
 						return subToken;
 					default:
-						throw new ParseException("Expected ELEMENT_SEPARATOR or SEGMENT_TERMINATOR, got " + subToken);
+						throw new EdiException("Expected ELEMENT_SEPARATOR or SEGMENT_TERMINATOR, got " + subToken);
 					}
 					break;
 				case ELEMENT_SEPARATOR:
@@ -74,7 +74,7 @@ public class ElementListParser implements Parser {
 					handler.endElement();
 					return token;
 				default:
-					throw new ParseException("Expected WORD or ELEMENT_SEPARATOR, found " + token);
+					throw new EdiException("Expected WORD or ELEMENT_SEPARATOR, found " + token);
 				}
 			}
 		}

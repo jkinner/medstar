@@ -1,17 +1,17 @@
 package com.sociodyne.parser.edi;
 
 public interface EdiHandler {
-	void startSegment(String segmentIdentifier) throws ParseException;
+	void startSegment(String segmentIdentifier) throws EdiException;
 
-	void endSegment() throws ParseException;
+	void endSegment() throws EdiException;
 
-	void startElement(String contents) throws ParseException;
+	void startElement(String contents) throws EdiException;
 	
-	void endElement() throws ParseException;
+	void endElement() throws EdiException;
 
-	void subElement(String contents) throws ParseException;
+	void subElement(String contents) throws EdiException;
 
-	void startLoop(String segmentIdentifier) throws ParseException;
+	void startLoop(String segmentIdentifier) throws EdiException;
 
-	void endLoop() throws ParseException;
+	void endLoop() throws EdiException;
 }

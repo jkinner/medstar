@@ -17,15 +17,15 @@ public class IsaEdiHandler implements EdiHandler {
 		this.delegate = delegate;
 	}
 
-	public void startSegment(String segmentIdentifier) throws ParseException {
+	public void startSegment(String segmentIdentifier) throws EdiException {
 		delegate.startSegment(segmentIdentifier);
 	}
 
-	public void endSegment() throws ParseException {
+	public void endSegment() throws EdiException {
 		delegate.endSegment();
 	}
 
-	public void startElement(String contents) throws ParseException {
+	public void startElement(String contents) throws EdiException {
 		currentElement++;
 		if (currentElement == ISA_SUBELEMENT_SEPARATOR_ELEMENT) {
 			configuration.setSubElementSeparator(contents.charAt(0));
@@ -33,19 +33,19 @@ public class IsaEdiHandler implements EdiHandler {
 		delegate.startElement(contents);
 	}
 
-	public void endElement() throws ParseException {
+	public void endElement() throws EdiException {
 		delegate.endElement();
 	}
 
-	public void subElement(String contents) throws ParseException {
+	public void subElement(String contents) throws EdiException {
 		delegate.subElement(contents);
 	}
 
-	public void startLoop(String segmentIdentifier) throws ParseException {
+	public void startLoop(String segmentIdentifier) throws EdiException {
 		delegate.startLoop(segmentIdentifier);
 	}
 
-	public void endLoop() throws ParseException {
+	public void endLoop() throws EdiException {
 		delegate.endLoop();
 	}
 }

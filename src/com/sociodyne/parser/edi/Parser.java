@@ -6,6 +6,6 @@ public interface Parser {
 
 	boolean matches(Token token);
 
-	Token parse(Token startToken) throws ParseException, IOException;
+	Token parse(Token startToken) throws EdiException, IOException;
 
 }

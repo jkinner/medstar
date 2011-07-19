@@ -39,7 +39,7 @@ public class SegmentParserTest extends MockEdiParserTest {
 
 	public void testOneSegment_elementListParserThrowsEof_throwsEof() throws Exception {
 		expect(elementListParser.parse(eq(Token.ELEMENT_SEPARATOR)))
-			.andThrow(new ParseException(new EOFException()));
+			.andThrow(new EdiException(new EOFException()));
 		readTokens(
 			Token.ELEMENT_SEPARATOR
 		);
@@ -52,7 +52,7 @@ public class SegmentParserTest extends MockEdiParserTest {
 		try {
 			parser.parse(new Token(Token.Type.WORD, "ISA"));
 			fail("Expected ParseException caused by EOFException");
-		} catch (ParseException e) {
+		} catch (EdiException e) {
 			assertTrue("Expected EOFException", EOFException.class.isAssignableFrom(e.getCause().getClass()));
 		}
 	}

@@ -176,7 +176,7 @@ public class EdiXmlReader implements XMLReader {
 			if (! (isaToken == Token.SEGMENT_TERMINATOR)) {
 				throw new UnexpectedTokenException(isaToken, Token.SEGMENT_TERMINATOR);
 			}
-		} catch (ParseException e) {
+		} catch (EdiException e) {
 			if (defaultWrapExceptions) {
 				e = Exceptions.wrap(e, location.toString());
 			}
@@ -190,7 +190,7 @@ public class EdiXmlReader implements XMLReader {
 		if (token != null) {
 			try {
 				segmentListParser.parse(token);
-			} catch (ParseException e) {
+			} catch (EdiException e) {
 				if (e.getCause() instanceof IOException) {
 					// Throw IOExceptions directly.
 					IOException ioe = (IOException) e.getCause();

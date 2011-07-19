@@ -50,54 +50,54 @@ public class EdiXmlAdapter implements EdiHandler {
 		this.handler = handler;
 	}
 
-	public void startSegment(String segmentIdentifier) throws ParseException {
+	public void startSegment(String segmentIdentifier) throws EdiException {
 		start(SEGMENT_ELEMENT, Attributes.of(attributeQName(TYPE_ATTRIBUTE), segmentIdentifier));
 	}
 
 
-	public void endSegment() throws ParseException {
+	public void endSegment() throws EdiException {
 		end(SEGMENT_ELEMENT);
 	}
 
-	public void startElement(String contents) throws ParseException {
+	public void startElement(String contents) throws EdiException {
 		start(ELEMENT_ELEMENT, contents);
 	}
 
-	public void endElement() throws ParseException {
+	public void endElement() throws EdiException {
 		end(ELEMENT_ELEMENT);
 	}
 
-	public void subElement(String contents) throws ParseException {
+	public void subElement(String contents) throws EdiException {
 		start(SUBELEMENT_ELEMENT, contents);
 	}
 
-	public void startLoop(String segmentIdentifier) throws ParseException {
+	public void startLoop(String segmentIdentifier) throws EdiException {
 		try {
 			handler.startElement(NAMESPACE_URI, LOOP_ELEMENT, qName(LOOP_ELEMENT),
 					Attributes.of(attributeQName(TYPE_ATTRIBUTE), segmentIdentifier));
 		} catch (SAXException e) {
-			throw new ParseException(e);
+			throw new EdiException(e);
 		}
 
 	}
 
-	public void endLoop() throws ParseException {
+	public void endLoop() throws EdiException {
 		end(LOOP_ELEMENT);
 	}
 
 	// XML generation Methods
 	
 	/** Start an XML element with no content. */
-	private void start(String element, String contents) throws ParseException {
+	private void start(String element, String contents) throws EdiException {
 		start(element, contents, Attributes.of());
 	}
 
-	private void start(String element, Attributes attributes) throws ParseException {
+	private void start(String element, Attributes attributes) throws EdiException {
 		start(element, null, attributes);
 	}
 
 	/** Start an XML element with text {@code content}. */
-	private void start(String element, String contents, Attributes attributes) throws ParseException {
+	private void start(String element, String contents, Attributes attributes) throws EdiException {
 		try {
 			handler.startElement(NAMESPACE_URI, element, qName(element),
 				attributes);
@@ -105,16 +105,16 @@ public class EdiXmlAdapter implements EdiHandler {
 				handler.characters(contents.toCharArray(), 0, contents.length());
 			}
 		} catch (SAXException e) {
-			throw new ParseException(e);
+			throw new EdiException(e);
 		}
 	}
 
 	/** End an XML element. */
-	private void end(String element) throws ParseException {
+	private void end(String element) throws EdiException {
 		try {
 			handler.endElement(NAMESPACE_URI, element, qName(element));
 		} catch (SAXException e) {
-			throw new ParseException(e);
+			throw new EdiException(e);
 		}
 	}
 

@@ -30,7 +30,7 @@ public class SegmentListParser implements Parser {
 		return token.getType() == Token.Type.WORD;
 	}
 
-	public Token parse(Token startToken) throws ParseException, IOException {
+	public Token parse(Token startToken) throws EdiException, IOException {
 		if (! matches(startToken)) {
 			throw new UnexpectedTokenException(startToken, Token.Type.WORD);
 		}

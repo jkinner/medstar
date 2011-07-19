@@ -94,7 +94,7 @@ public class ElementListParserTest extends MockEdiParserTest {
 	public void testTwoSubElements_noSegmentTerminator_throwsEof() throws Exception {
 		expect(subElementListParser.parse(
 				eq(new Token(Token.Type.SUB_ELEMENT_SEPARATOR))))
-			.andThrow(new ParseException(new EOFException()));
+			.andThrow(new EdiException(new EOFException()));
 
 		handler.startElement("123");
 
@@ -107,7 +107,7 @@ public class ElementListParserTest extends MockEdiParserTest {
 		try {
 			parser.parse(Token.ELEMENT_SEPARATOR);
 			fail("Expected ParseException caused by EOFException");
-		} catch (ParseException e) {
+		} catch (EdiException e) {
 			assertTrue("Expected EOFException", EOFException.class.isAssignableFrom(e.getCause().getClass()));
 		}
 	}

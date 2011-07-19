@@ -20,7 +20,7 @@ public class SubElementListParser implements Parser {
 		return token.getType() == Token.Type.SUB_ELEMENT_SEPARATOR;
 	}
 
-	public Token parse(Token token) throws ParseException, IOException {
+	public Token parse(Token token) throws EdiException, IOException {
 		if (!matches(token)) {
 			throw new UnexpectedTokenException(token, Token.Type.SUB_ELEMENT_SEPARATOR);
 		}
@@ -28,7 +28,7 @@ public class SubElementListParser implements Parser {
 		while (true) {
 			token = tokenizer.nextToken();
 			if (token == null) {
-				throw new ParseException("Unexpected EOF in sub-element", new EOFException());
+				throw new EdiException("Unexpected EOF in sub-element", new EOFException());
 			}
 
 			if (token.getType() == Token.Type.WORD) {
@@ -36,7 +36,7 @@ public class SubElementListParser implements Parser {
 				location.nextSubElement();
 				token = tokenizer.nextToken();
 				if (token == null) {
-					throw new ParseException("Unexpected EOF in sub-element", new EOFException());
+					throw new EdiException("Unexpected EOF in sub-element", new EOFException());
 				}
 
 				switch (token.getType()) {

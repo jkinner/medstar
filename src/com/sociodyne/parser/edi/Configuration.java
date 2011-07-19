@@ -2,6 +2,8 @@ package com.sociodyne.parser.edi;
 
 import com.sociodyne.LockingHolder;
 
+import com.google.common.base.Preconditions;
+
 public class Configuration {
 	private char segmentTerminator = '~';
 	private char elementSeparator = '*';
@@ -61,5 +63,19 @@ public class Configuration {
 
 	public boolean isElementSeparator(char ch) {
 		return ch == elementSeparator;
+	}
+
+	public char getSegmentTerminator() {
+		return segmentTerminator;
+	}
+
+	public char getElementSeparator() {
+		return elementSeparator;
+	}
+
+	public char getSubElementSeparator() {
+		Preconditions.checkState(subElementSeparator.get() != null,
+			"Sub-element separtor not assigned");
+		return subElementSeparator.get();
 	}
 }

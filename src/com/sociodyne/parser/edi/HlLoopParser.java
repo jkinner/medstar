@@ -21,7 +21,7 @@ public class HlLoopParser extends SegmentParser {
 		return token != null && token.equals(HL_TOKEN);
 	}
 
-	public Token parse(Token startToken) throws ParseException, IOException {
+	public Token parse(Token startToken) throws EdiException, IOException {
 		if (!matches(startToken)) {
 			throw new UnexpectedTokenException(startToken, HL_TOKEN);
 		}
@@ -45,7 +45,7 @@ public class HlLoopParser extends SegmentParser {
 		token = tokenizer.nextToken();
 		// Now we read exactly one segment
 		if (token == null) {
-			throw new ParseException(new EOFException());
+			throw new EdiException(new EOFException());
 		}
 
 		while (token.getType() == Token.Type.WORD && token.getValue().equals("TRN")) {
@@ -57,7 +57,7 @@ public class HlLoopParser extends SegmentParser {
 			// The rest of the algorithm expects a word, which should be next.
 			token = tokenizer.nextToken();
 			if (token == null) {
-				throw new ParseException(new EOFException());
+				throw new EdiException(new EOFException());
 			}
 		}
 

@@ -21,7 +21,7 @@ public class LsLoopParser extends SegmentParser {
 		return token.equals(LS_TOKEN);
 	}
 
-	public Token parse(Token startToken) throws ParseException, IOException {
+	public Token parse(Token startToken) throws EdiException, IOException {
 		if (!matches(startToken)) {
 			throw new UnexpectedTokenException(startToken, LS_TOKEN);
 		}
@@ -45,7 +45,7 @@ public class LsLoopParser extends SegmentParser {
 		token = tokenizer.nextToken();
 		do {
 			if (token == null) {
-				throw new ParseException(new EOFException());
+				throw new EdiException(new EOFException());
 			}
 			if (token.getType() != Token.Type.WORD) {
 				throw new UnexpectedTokenException(token, Token.Type.WORD);

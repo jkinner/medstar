@@ -1,6 +1,6 @@
 package com.sociodyne.parser.edi;
 
-import com.sociodyne.parser.edi.ParseException;
+import com.sociodyne.parser.edi.EdiException;
 import com.sociodyne.parser.edi.SubElementListParser;
 import com.sociodyne.parser.edi.Token;
 import com.sociodyne.test.parser.edi.MockEdiParserTest;
@@ -31,7 +31,7 @@ public class SubElementListParserTest extends MockEdiParserTest {
 		try {
 			parser.parse(Token.SUB_ELEMENT_SEPARATOR);
 			fail("Expected ParseException caused by EOFException");
-		} catch (ParseException e) {
+		} catch (EdiException e) {
 			assertTrue("Expected EOFException", EOFException.class.isAssignableFrom(e.getCause().getClass()));
 		}
 	}
@@ -77,7 +77,7 @@ public class SubElementListParserTest extends MockEdiParserTest {
 		try {
 			parser.parse(Token.SUB_ELEMENT_SEPARATOR);
 			fail("Expected ParseException caused by EOFException");
-		} catch (ParseException e) {
+		} catch (EdiException e) {
 			assertTrue("Expected EOFException", EOFException.class.isAssignableFrom(e.getCause().getClass()));
 		}
 	}

@@ -26,9 +26,9 @@ public class LoopParser extends SegmentParser {
 		return token.getType() == Token.Type.WORD;
 	}
 
-	public Token parse(Token startToken) throws ParseException, IOException {
+	public Token parse(Token startToken) throws EdiException, IOException {
 		if (!matches(startToken)) {
-			throw new ParseException("Unrecognized token " + startToken);
+			throw new EdiException("Unrecognized token " + startToken);
 		}
 
 		String loopSegment = startToken.getValue();
@@ -56,7 +56,7 @@ public class LoopParser extends SegmentParser {
 					if (token.getType() == Token.Type.WORD) {
 						token = parseChildSegments(loopSegment, token);
 						if (token == null) {
-							throw new ParseException(new EOFException());
+							throw new EdiException(new EOFException());
 						}
 						if (token.getType() == Token.Type.WORD) {
 							if (token.getValue().equals(loopSegment)) {
@@ -88,7 +88,7 @@ public class LoopParser extends SegmentParser {
 	}
 
 	private Token parseChildSegments(String loopIdentifier, Token token)
-			throws ParseException, IOException, UnexpectedTokenException {
+			throws EdiException, IOException, UnexpectedTokenException {
 		while (token != null) {
 			// It's a segment identifier. Make sure it's part of the segment grammar.
 			if (token.getType() == Token.Type.WORD &&
