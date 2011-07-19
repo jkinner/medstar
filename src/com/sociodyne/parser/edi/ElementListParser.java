@@ -37,7 +37,9 @@ public class ElementListParser implements Parser {
 				throw new EOFException();
 			}
 
-			if (token.getType() == Token.Type.WORD) {
+			ELEMENT_TOKEN_TYPE:
+			switch(token.getType()) {
+			case WORD:
 				// Good
 				location.nextElement();
 				handler.startElement(token.getValue());
@@ -65,17 +67,25 @@ public class ElementListParser implements Parser {
 					default:
 						throw new EdiException("Expected ELEMENT_SEPARATOR or SEGMENT_TERMINATOR, got " + subToken);
 					}
-					break;
+					break ELEMENT_TOKEN_TYPE;
 				case ELEMENT_SEPARATOR:
 					// Good
 					handler.endElement();
-					break;
+					break ELEMENT_TOKEN_TYPE;
 				case SEGMENT_TERMINATOR:
 					handler.endElement();
 					return token;
 				default:
 					throw new EdiException("Expected WORD or ELEMENT_SEPARATOR, found " + token);
 				}
+			case ELEMENT_SEPARATOR:
+				handler.startElement("");
+				handler.endElement();
+				break;
+			case SEGMENT_TERMINATOR:
+				break;
+			default:
+				throw new UnexpectedTokenException(token);
 			}
 		}
 	}

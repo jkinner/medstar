@@ -17,8 +17,6 @@ import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
-import com.doradosystems.upload.UploadHandler;
-import com.doradosystems.upload.UploadServlet;
 import com.google.inject.Provider;
 import com.sociodyne.test.Mock;
 import com.sociodyne.test.MockTest;
