@@ -8,13 +8,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD})
+@Target({ ElementType.FIELD })
 public @interface Mock {
-	public enum Type {
-		STRICT,
-		NICE,
-		DEFAULT
-	}
 
-	Type value() default(Type.DEFAULT);
+  public enum Type {
+    STRICT, NICE, DEFAULT
+  }
+
+  Type value() default (Type.DEFAULT);
 }

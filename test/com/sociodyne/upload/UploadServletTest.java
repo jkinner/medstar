@@ -2,11 +2,15 @@
 
 package com.sociodyne.upload;
 
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.same;
+
+import com.sociodyne.test.Mock;
+import com.sociodyne.test.MockTest;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
-
-import static org.easymock.EasyMock.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -18,8 +22,6 @@ import org.apache.commons.fileupload.FileUploadException;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 
 import com.google.inject.Provider;
-import com.sociodyne.test.Mock;
-import com.sociodyne.test.MockTest;
 
 /**
  * 
@@ -28,112 +30,121 @@ import com.sociodyne.test.MockTest;
  * @author jkinner
  */
 public class UploadServletTest extends MockTest {
-	private static final String TEXT_PLAIN_MIME_TYPE = "text/plain";
-	private @Mock(Mock.Type.STRICT) HttpServletRequest request;
-	private @Mock(Mock.Type.STRICT) HttpServletResponse response;
-	private @Mock(Mock.Type.STRICT) UploadServlet.MultipartChecker checker;
-	private @Mock(Mock.Type.STRICT) Provider<ServletFileUpload> provider;
-	private @Mock(Mock.Type.STRICT) ServletFileUpload upload;
-	private @Mock(Mock.Type.STRICT) UploadHandler uploadHandler;
 
-	@Override
-	public void setUp() throws Exception {
-		// Set up mocks
-		super.setUp();
-		expect(provider.get()).andStubReturn(upload);
-	}
+  private static final String TEXT_PLAIN_MIME_TYPE = "text/plain";
+  private @Mock(Mock.Type.STRICT)
+  HttpServletRequest request;
+  private @Mock(Mock.Type.STRICT)
+  HttpServletResponse response;
+  private @Mock(Mock.Type.STRICT)
+  UploadServlet.MultipartChecker checker;
+  private @Mock(Mock.Type.STRICT)
+  Provider<ServletFileUpload> provider;
+  private @Mock(Mock.Type.STRICT)
+  ServletFileUpload upload;
+  private @Mock(Mock.Type.STRICT)
+  UploadHandler uploadHandler;
 
-	public void testNullHandlers_throwsServletException() throws Exception {
-		UploadServlet servlet = new UploadServlet(checker, provider, null);
-		replay();
-		try {
-			servlet.doPost(request, response);
-			fail("Expected ServletException");
-		} catch (ServletException e) {
-			// Expected
-		}
-	}
+  @Override
+  public void setUp() throws Exception {
+    // Set up mocks
+    super.setUp();
+    expect(provider.get()).andStubReturn(upload);
+  }
 
-	@SuppressWarnings("unchecked")
-	public void testEmptyHandlers_throwsServletException() throws Exception {
-		UploadServlet servlet = new UploadServlet(checker, provider, Collections.EMPTY_MAP);
-		replay();
-		try {
-			servlet.doPost(request, response);
-			fail("Expected ServletException");
-		} catch (ServletException e) {
-			// Expected
-		}
-	}
-	
-	public void testOneHandler_handlerInvoked() throws Exception {
-		expect(checker.isMultipartContent(request)).andReturn(true);
+  public void testNullHandlers_throwsServletException() throws Exception {
+    final UploadServlet servlet = new UploadServlet(checker, provider, null);
+    replay();
+    try {
+      servlet.doPost(request, response);
+      fail("Expected ServletException");
+    } catch (final ServletException e) {
+      // Expected
+    }
+  }
 
-		UploadServlet servlet = new UploadServlet(checker, provider, Collections.singletonMap(TEXT_PLAIN_MIME_TYPE, uploadHandler));
-		
-		FileItemIterator itor = createMock(FileItemIterator.class);
-		expect(upload.getItemIterator(same(request))).andReturn(itor);
+  @SuppressWarnings("unchecked")
+  public void testEmptyHandlers_throwsServletException() throws Exception {
+    final UploadServlet servlet = new UploadServlet(checker, provider, Collections.EMPTY_MAP);
+    replay();
+    try {
+      servlet.doPost(request, response);
+      fail("Expected ServletException");
+    } catch (final ServletException e) {
+      // Expected
+    }
+  }
 
-		expectHandling(uploadHandler, upload, itor);
+  public void testOneHandler_handlerInvoked() throws Exception {
+    expect(checker.isMultipartContent(request)).andReturn(true);
 
-		expect(itor.hasNext()).andReturn(false);
+    final UploadServlet servlet = new UploadServlet(checker, provider, Collections.singletonMap(
+        TEXT_PLAIN_MIME_TYPE, uploadHandler));
 
-		replay();
+    final FileItemIterator itor = createMock(FileItemIterator.class);
+    expect(upload.getItemIterator(same(request))).andReturn(itor);
 
-		servlet.doPost(request, response);
-	}
+    expectHandling(uploadHandler, upload, itor);
 
-	public void testOneHandlerMultipleFiles_handlerInvokedMultipleTimes() throws Exception {
-		expect(checker.isMultipartContent(same(request))).andReturn(true);
+    expect(itor.hasNext()).andReturn(false);
 
-		UploadServlet servlet = new UploadServlet(checker, provider, Collections.singletonMap(TEXT_PLAIN_MIME_TYPE, uploadHandler));
-		
-		FileItemIterator itor = createMock(FileItemIterator.class);
-		expect(upload.getItemIterator(same(request))).andReturn(itor);
+    replay();
 
-		expectHandling(uploadHandler, upload, itor);
-		expectHandling(uploadHandler, upload, itor);
+    servlet.doPost(request, response);
+  }
 
-		expect(itor.hasNext()).andReturn(false);
+  public void testOneHandlerMultipleFiles_handlerInvokedMultipleTimes() throws Exception {
+    expect(checker.isMultipartContent(same(request))).andReturn(true);
 
-		replay();
+    final UploadServlet servlet = new UploadServlet(checker, provider, Collections.singletonMap(
+        TEXT_PLAIN_MIME_TYPE, uploadHandler));
 
-		servlet.doPost(request, response);
-	}
+    final FileItemIterator itor = createMock(FileItemIterator.class);
+    expect(upload.getItemIterator(same(request))).andReturn(itor);
 
-	public void testOneHandlerDoesNotMatch_handlerNotInvoked() throws Exception {
-		UploadServlet servlet = new UploadServlet(checker, provider, Collections.singletonMap(TEXT_PLAIN_MIME_TYPE, uploadHandler));
-		expect(checker.isMultipartContent(same(request))).andReturn(true);
-		
-		FileItemIterator itor = createMock(FileItemIterator.class);
-		expect(upload.getItemIterator(same(request))).andReturn(itor);
+    expectHandling(uploadHandler, upload, itor);
+    expectHandling(uploadHandler, upload, itor);
 
-		FileItemStream stream = createMock(FileItemStream.class);
-		expect(stream.getContentType()).andReturn(TEXT_PLAIN_MIME_TYPE + "kablam");
+    expect(itor.hasNext()).andReturn(false);
 
-		expect(itor.hasNext()).andReturn(true);
-		expect(itor.next()).andReturn(stream);
+    replay();
 
-		expect(itor.hasNext()).andReturn(false);
+    servlet.doPost(request, response);
+  }
 
-		replay();
+  public void testOneHandlerDoesNotMatch_handlerNotInvoked() throws Exception {
+    final UploadServlet servlet = new UploadServlet(checker, provider, Collections.singletonMap(
+        TEXT_PLAIN_MIME_TYPE, uploadHandler));
+    expect(checker.isMultipartContent(same(request))).andReturn(true);
 
-		servlet.doPost(request, response);
-	}
+    final FileItemIterator itor = createMock(FileItemIterator.class);
+    expect(upload.getItemIterator(same(request))).andReturn(itor);
 
-	protected void expectHandling(UploadHandler mockHandler,
-			ServletFileUpload upload, FileItemIterator itor)
-			throws FileUploadException, IOException, Exception {
-		FileItemStream stream = createMock(FileItemStream.class);
-		expect(itor.hasNext()).andReturn(true);
-		expect(itor.next()).andReturn(stream);
+    final FileItemStream stream = createMock(FileItemStream.class);
+    expect(stream.getContentType()).andReturn(TEXT_PLAIN_MIME_TYPE + "kablam");
 
-		expect(stream.getContentType()).andReturn(TEXT_PLAIN_MIME_TYPE);
-		
-		InputStream is = createMock(InputStream.class);
-		expect(stream.openStream()).andReturn(is);
-		
-		// This is the crux of the test:
-		mockHandler.handle(same(is));
-	}
+    expect(itor.hasNext()).andReturn(true);
+    expect(itor.next()).andReturn(stream);
+
+    expect(itor.hasNext()).andReturn(false);
+
+    replay();
+
+    servlet.doPost(request, response);
+  }
+
+  protected void expectHandling(UploadHandler mockHandler, ServletFileUpload upload,
+      FileItemIterator itor) throws FileUploadException, IOException, Exception {
+    final FileItemStream stream = createMock(FileItemStream.class);
+    expect(itor.hasNext()).andReturn(true);
+    expect(itor.next()).andReturn(stream);
+
+    expect(stream.getContentType()).andReturn(TEXT_PLAIN_MIME_TYPE);
+
+    final InputStream is = createMock(InputStream.class);
+    expect(stream.openStream()).andReturn(is);
+
+    // This is the crux of the test:
+    mockHandler.handle(same(is));
+  }
 }

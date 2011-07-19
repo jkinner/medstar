@@ -10,72 +10,75 @@ import com.sociodyne.test.parser.edi.MockEdiParserTest;
 import java.io.EOFException;
 
 public class SegmentParserTest extends MockEdiParserTest {
-	@Mock(Mock.Type.NICE) ParserFactory<ElementListParser> elementListParserFactory;
-	@Mock ElementListParser elementListParser;
 
-	public void setUp() throws Exception {
-		super.setUp();
-		expect(elementListParserFactory.create(anyObject(EdiLocation.class),
-				anyObject(Tokenizer.class), anyObject(EdiHandler.class)))
-			.andStubReturn(elementListParser);
-	}
+  @Mock(Mock.Type.NICE)
+  ParserFactory<ElementListParser> elementListParserFactory;
+  @Mock
+  ElementListParser elementListParser;
 
-	public void testOneSegment_succeeds() throws Exception {
-		expect(elementListParser.parse(eq(Token.ELEMENT_SEPARATOR)))
-			.andReturn(Token.SEGMENT_TERMINATOR);
-		readTokens(
-			Token.ELEMENT_SEPARATOR
-			// This will trigger an element list parse, which is all that will happen.
-		);
+  @Override
+  public void setUp() throws Exception {
+    super.setUp();
+    expect(
+        elementListParserFactory.create(anyObject(EdiLocation.class), anyObject(Tokenizer.class),
+            anyObject(EdiHandler.class))).andStubReturn(elementListParser);
+  }
 
-		handler.startSegment(eq("ISA"));
-		handler.endSegment();
+  public void testOneSegment_succeeds() throws Exception {
+    expect(elementListParser.parse(eq(Token.ELEMENT_SEPARATOR)))
+        .andReturn(Token.SEGMENT_TERMINATOR);
+    readTokens(Token.ELEMENT_SEPARATOR
+    // This will trigger an element list parse, which is all that will happen.
+    );
 
-		replay();
+    handler.startSegment(eq("ISA"));
+    handler.endSegment();
 
-		SegmentParser parser = new SegmentParser(tokenizer, location, handler, elementListParserFactory);
-		assertEquals(Token.SEGMENT_TERMINATOR, parser.parse(new Token(Token.Type.WORD, "ISA")));
-	}
+    replay();
 
-	public void testOneSegment_elementListParserThrowsEof_throwsEof() throws Exception {
-		expect(elementListParser.parse(eq(Token.ELEMENT_SEPARATOR)))
-			.andThrow(new EdiException(new EOFException()));
-		readTokens(
-			Token.ELEMENT_SEPARATOR
-		);
+    final SegmentParser parser = new SegmentParser(tokenizer, location, handler,
+        elementListParserFactory);
+    assertEquals(Token.SEGMENT_TERMINATOR, parser.parse(new Token(Token.Type.WORD, "ISA")));
+  }
 
-		handler.startSegment(eq("ISA"));
+  public void testOneSegment_elementListParserThrowsEof_throwsEof() throws Exception {
+    expect(elementListParser.parse(eq(Token.ELEMENT_SEPARATOR))).andThrow(
+        new EdiException(new EOFException()));
+    readTokens(Token.ELEMENT_SEPARATOR);
 
-		replay();
+    handler.startSegment(eq("ISA"));
 
-		SegmentParser parser = new SegmentParser(tokenizer, location, handler, elementListParserFactory);
-		try {
-			parser.parse(new Token(Token.Type.WORD, "ISA"));
-			fail("Expected ParseException caused by EOFException");
-		} catch (EdiException e) {
-			assertTrue("Expected EOFException", EOFException.class.isAssignableFrom(e.getCause().getClass()));
-		}
-	}
+    replay();
 
-	public void testTwoSegments_stopsAfterOneSegment() throws Exception {
-		expect(elementListParser.parse(eq(Token.ELEMENT_SEPARATOR)))
-			.andReturn(Token.SEGMENT_TERMINATOR);
+    final SegmentParser parser = new SegmentParser(tokenizer, location, handler,
+        elementListParserFactory);
+    try {
+      parser.parse(new Token(Token.Type.WORD, "ISA"));
+      fail("Expected ParseException caused by EOFException");
+    } catch (final EdiException e) {
+      assertTrue("Expected EOFException",
+          EOFException.class.isAssignableFrom(e.getCause().getClass()));
+    }
+  }
 
-		readTokens(
-			Token.ELEMENT_SEPARATOR,
-			// This token will not be reached
-			Token.ELEMENT_SEPARATOR
-		);
+  public void testTwoSegments_stopsAfterOneSegment() throws Exception {
+    expect(elementListParser.parse(eq(Token.ELEMENT_SEPARATOR)))
+        .andReturn(Token.SEGMENT_TERMINATOR);
 
-		handler.startSegment(eq("ISA"));
-		handler.endSegment();
+    readTokens(Token.ELEMENT_SEPARATOR,
+    // This token will not be reached
+        Token.ELEMENT_SEPARATOR);
 
-		replay();
+    handler.startSegment(eq("ISA"));
+    handler.endSegment();
 
-		SegmentParser parser = new SegmentParser(tokenizer, location, handler, elementListParserFactory);
-		parser.parse(new Token(Token.Type.WORD, "ISA"));
-		// The other token should not have been read.
-		tokenizer.nextToken();
-	}
+    replay();
+
+    final SegmentParser parser = new SegmentParser(tokenizer, location, handler,
+        elementListParserFactory);
+    parser.parse(new Token(Token.Type.WORD, "ISA"));
+    // The other token should not have been read.
+    tokenizer.nextToken();
+  }
 
 }

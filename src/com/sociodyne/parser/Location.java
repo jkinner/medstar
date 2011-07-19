@@ -1,41 +1,41 @@
 package com.sociodyne.parser;
 
 public class Location {
-	int line;
-	int character;
 
-	public Location() {
-	}
+  int line;
+  int character;
 
-	public void nextLine() {
-		line++;
-		character = 0;
-	}
+  public Location() {
+  }
 
-	public void nextChar() {
-		character++;
-	}
+  public void nextLine() {
+    line++;
+    character = 0;
+  }
 
-	public int getLine() {
-		return line;
-	}
+  public void nextChar() {
+    character++;
+  }
 
-	public int getChar() {
-		return character;
-	}
+  public int getLine() {
+    return line;
+  }
 
-	@Override
-	public String toString() {
-		StringBuffer locationBuffer = new StringBuffer();
-		locationBuffer.append("line ").append(line).append(", character ")
-				.append(character);
-		return locationBuffer.toString();
-	}
+  public int getChar() {
+    return character;
+  }
 
-	public static Location copyOf(Location location) {
-		Location newLocation = new Location();
-		newLocation.character = location.character;
-		newLocation.line = location.line;
-		return newLocation;
-	}
+  @Override
+  public String toString() {
+    final StringBuffer locationBuffer = new StringBuffer();
+    locationBuffer.append("line ").append(line).append(", character ").append(character);
+    return locationBuffer.toString();
+  }
+
+  public static Location copyOf(Location location) {
+    final Location newLocation = new Location();
+    newLocation.character = location.character;
+    newLocation.line = location.line;
+    return newLocation;
+  }
 }

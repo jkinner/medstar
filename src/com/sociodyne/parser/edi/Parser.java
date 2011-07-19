@@ -4,8 +4,8 @@ import java.io.IOException;
 
 public interface Parser {
 
-	boolean matches(Token token);
+  boolean matches(Token token);
 
-	Token parse(Token startToken) throws EdiException, IOException;
+  Token parse(Token startToken) throws EdiException, IOException;
 
 }

@@ -5,5 +5,6 @@ package com.sociodyne.upload;
 import java.io.InputStream;
 
 public interface UploadHandler {
-	void handle(InputStream fileStream) throws Exception;
+
+  void handle(InputStream fileStream) throws Exception;
 }

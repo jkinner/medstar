@@ -4,169 +4,162 @@ import static org.easymock.EasyMock.anyObject;
 import static org.easymock.EasyMock.eq;
 import static org.easymock.EasyMock.expect;
 
-import com.sociodyne.parser.edi.ElementListParser;
-import com.sociodyne.parser.edi.HlLoopParser;
-import com.sociodyne.parser.edi.ParserFactory;
-import com.sociodyne.parser.edi.SegmentParser;
-import com.sociodyne.parser.edi.SegmentParserFactory;
-import com.sociodyne.parser.edi.Token;
-import com.sociodyne.parser.edi.Tokenizer;
 import com.sociodyne.test.Mock;
 import com.sociodyne.test.parser.edi.MockEdiParserTest;
 
 public class HlLoopParserTest extends MockEdiParserTest {
-	@Mock ParserFactory<ElementListParser> elementListParserFactory;
-	@Mock ElementListParser elementListParser;
-	@Mock SegmentParserFactory segmentParserFactory;
-	@Mock SegmentParser segmentParser;
 
-	public void testSingleHlLoop_succeeds() throws Exception {
-		expect(elementListParserFactory.create(anyObject(EdiLocation.class),
-				anyObject(Tokenizer.class), anyObject(EdiHandler.class)))
-			.andReturn(elementListParser);
-		expect(elementListParser.parse(eq(Token.ELEMENT_SEPARATOR)))
-			.andReturn(Token.SEGMENT_TERMINATOR);
-		expect(segmentParserFactory.create(anyObject(Tokenizer.class),
-			eq(location), eq(handler), eq("DTP")))
-			.andReturn(segmentParser);
-		expect(segmentParser.parse(eq(new Token(Token.Type.WORD, "DTP"))))
-			.andReturn(Token.SEGMENT_TERMINATOR);
+  @Mock
+  ParserFactory<ElementListParser> elementListParserFactory;
+  @Mock
+  ElementListParser elementListParser;
+  @Mock
+  SegmentParserFactory segmentParserFactory;
+  @Mock
+  SegmentParser segmentParser;
 
-		readTokens(
-			Token.ELEMENT_SEPARATOR,
-			// Read by the elementListParser mock
-			Token.word("DTP")
-			// Read by the child segment parser
-		);
+  public void testSingleHlLoop_succeeds() throws Exception {
+    expect(
+        elementListParserFactory.create(anyObject(EdiLocation.class), anyObject(Tokenizer.class),
+            anyObject(EdiHandler.class))).andReturn(elementListParser);
+    expect(elementListParser.parse(eq(Token.ELEMENT_SEPARATOR)))
+        .andReturn(Token.SEGMENT_TERMINATOR);
+    expect(
+        segmentParserFactory.create(anyObject(Tokenizer.class), eq(location), eq(handler),
+            eq("DTP"))).andReturn(segmentParser);
+    expect(segmentParser.parse(eq(new Token(Token.Type.WORD, "DTP")))).andReturn(
+        Token.SEGMENT_TERMINATOR);
 
-		handler.startLoop("HL");
-		handler.startSegment("HL");
-		// DTP is parsed by a mock; no handler events generated
-		handler.endSegment();
-		handler.endLoop();
+    readTokens(Token.ELEMENT_SEPARATOR,
+    // Read by the elementListParser mock
+        Token.word("DTP")
+    // Read by the child segment parser
+    );
 
-		replay();
+    handler.startLoop("HL");
+    handler.startSegment("HL");
+    // DTP is parsed by a mock; no handler events generated
+    handler.endSegment();
+    handler.endLoop();
 
-		HlLoopParser hlParser = new HlLoopParser(tokenizer, location, handler, elementListParserFactory,
-				segmentParserFactory);
-		hlParser.parse(Token.word("HL"));
-	}
+    replay();
 
-	public void testSingleHlLoop_readsSingleTrnSegment_succeeds() throws Exception {
-		expect(elementListParserFactory.create(anyObject(EdiLocation.class),
-				anyObject(Tokenizer.class), anyObject(EdiHandler.class)))
-			.andReturn(elementListParser);
-		expect(elementListParser.parse(eq(Token.ELEMENT_SEPARATOR)))
-			.andReturn(Token.SEGMENT_TERMINATOR);
-		expect(segmentParserFactory.create(anyObject(Tokenizer.class),
-			eq(location), eq(handler), eq("TRN")))
-			.andReturn(segmentParser);
-		expect(segmentParser.parse(eq(new Token(Token.Type.WORD, "TRN"))))
-			.andReturn(Token.SEGMENT_TERMINATOR);
-		expect(segmentParserFactory.create(anyObject(Tokenizer.class),
-			eq(location), eq(handler), eq("DTP")))
-			.andReturn(segmentParser);
-		expect(segmentParser.parse(eq(new Token(Token.Type.WORD, "DTP"))))
-			.andReturn(Token.SEGMENT_TERMINATOR);
+    final HlLoopParser hlParser = new HlLoopParser(tokenizer, location, handler,
+        elementListParserFactory, segmentParserFactory);
+    hlParser.parse(Token.word("HL"));
+  }
 
-		readTokens(
-			Token.ELEMENT_SEPARATOR,
-			// Read by the elementListParser mock
-			Token.word("TRN"),
-			// Read by the child segment parser
-			Token.word("DTP")
-			// Read by the child segment parser
-		);
+  public void testSingleHlLoop_readsSingleTrnSegment_succeeds() throws Exception {
+    expect(
+        elementListParserFactory.create(anyObject(EdiLocation.class), anyObject(Tokenizer.class),
+            anyObject(EdiHandler.class))).andReturn(elementListParser);
+    expect(elementListParser.parse(eq(Token.ELEMENT_SEPARATOR)))
+        .andReturn(Token.SEGMENT_TERMINATOR);
+    expect(
+        segmentParserFactory.create(anyObject(Tokenizer.class), eq(location), eq(handler),
+            eq("TRN"))).andReturn(segmentParser);
+    expect(segmentParser.parse(eq(new Token(Token.Type.WORD, "TRN")))).andReturn(
+        Token.SEGMENT_TERMINATOR);
+    expect(
+        segmentParserFactory.create(anyObject(Tokenizer.class), eq(location), eq(handler),
+            eq("DTP"))).andReturn(segmentParser);
+    expect(segmentParser.parse(eq(new Token(Token.Type.WORD, "DTP")))).andReturn(
+        Token.SEGMENT_TERMINATOR);
 
-		handler.startLoop("HL");
-		handler.startSegment("HL");
-		// TRN is parsed by a mock; no handler events generated
-		handler.endSegment();
-		handler.endLoop();
-		// DTP is parsed by a mock; no handler events generated
+    readTokens(Token.ELEMENT_SEPARATOR,
+    // Read by the elementListParser mock
+        Token.word("TRN"),
+        // Read by the child segment parser
+        Token.word("DTP")
+    // Read by the child segment parser
+    );
 
-		replay();
+    handler.startLoop("HL");
+    handler.startSegment("HL");
+    // TRN is parsed by a mock; no handler events generated
+    handler.endSegment();
+    handler.endLoop();
+    // DTP is parsed by a mock; no handler events generated
 
-		HlLoopParser hlParser = new HlLoopParser(tokenizer, location, handler,
-				elementListParserFactory, segmentParserFactory);
-		hlParser.parse(Token.word("HL"));
-	}
+    replay();
 
-	public void testSingleHlLoop_readsMultipleTrnSegment_succeeds() throws Exception {
-		expect(elementListParserFactory.create(anyObject(EdiLocation.class),
-				anyObject(Tokenizer.class), anyObject(EdiHandler.class)))
-			.andReturn(elementListParser);
-		expect(elementListParser.parse(eq(Token.ELEMENT_SEPARATOR)))
-			.andReturn(Token.SEGMENT_TERMINATOR);
-		expect(segmentParserFactory.create(anyObject(Tokenizer.class),
-			eq(location), eq(handler), eq("TRN"))).andReturn(segmentParser)
-			.times(2);
-		expect(segmentParser.parse(eq(new Token(Token.Type.WORD, "TRN"))))
-			.andReturn(Token.SEGMENT_TERMINATOR)
-			.times(2);
-		expect(segmentParserFactory.create(anyObject(Tokenizer.class),
-			eq(location), eq(handler), eq("DTP"))).andReturn(segmentParser);
-		expect(segmentParser.parse(eq(new Token(Token.Type.WORD, "DTP"))))
-			.andReturn(Token.SEGMENT_TERMINATOR);
+    final HlLoopParser hlParser = new HlLoopParser(tokenizer, location, handler,
+        elementListParserFactory, segmentParserFactory);
+    hlParser.parse(Token.word("HL"));
+  }
 
-		readTokens(
-			Token.ELEMENT_SEPARATOR,
-			// Read by the elementListParser mock
-			Token.word("TRN"),
-			// Read by the child segment parser
-			Token.word("TRN"),
-			// Read by the child segment parser
-			Token.word("DTP")
-			// Read by the child segment parser
-		);
-		
-		handler.startLoop("HL");
-		handler.startSegment("HL");
-		// TRN is parsed by a mock; no handler events generated
-		// DTP is parsed by a mock; no handler events generated
-		handler.endSegment();
-		handler.endLoop();
+  public void testSingleHlLoop_readsMultipleTrnSegment_succeeds() throws Exception {
+    expect(
+        elementListParserFactory.create(anyObject(EdiLocation.class), anyObject(Tokenizer.class),
+            anyObject(EdiHandler.class))).andReturn(elementListParser);
+    expect(elementListParser.parse(eq(Token.ELEMENT_SEPARATOR)))
+        .andReturn(Token.SEGMENT_TERMINATOR);
+    expect(
+        segmentParserFactory.create(anyObject(Tokenizer.class), eq(location), eq(handler),
+            eq("TRN"))).andReturn(segmentParser).times(2);
+    expect(segmentParser.parse(eq(new Token(Token.Type.WORD, "TRN")))).andReturn(
+        Token.SEGMENT_TERMINATOR).times(2);
+    expect(
+        segmentParserFactory.create(anyObject(Tokenizer.class), eq(location), eq(handler),
+            eq("DTP"))).andReturn(segmentParser);
+    expect(segmentParser.parse(eq(new Token(Token.Type.WORD, "DTP")))).andReturn(
+        Token.SEGMENT_TERMINATOR);
 
-		replay();
+    readTokens(Token.ELEMENT_SEPARATOR,
+    // Read by the elementListParser mock
+        Token.word("TRN"),
+        // Read by the child segment parser
+        Token.word("TRN"),
+        // Read by the child segment parser
+        Token.word("DTP")
+    // Read by the child segment parser
+    );
 
-		HlLoopParser hlParser = new HlLoopParser(tokenizer, location, handler,
-				elementListParserFactory, segmentParserFactory);
-		hlParser.parse(Token.word("HL"));
-	}
+    handler.startLoop("HL");
+    handler.startSegment("HL");
+    // TRN is parsed by a mock; no handler events generated
+    // DTP is parsed by a mock; no handler events generated
+    handler.endSegment();
+    handler.endLoop();
 
-	public void testSingleHlLoop_terminatesAfterOneSegment() throws Exception {
-		expect(elementListParserFactory.create(anyObject(EdiLocation.class),
-				anyObject(Tokenizer.class), anyObject(EdiHandler.class)))
-			.andReturn(elementListParser);
-		expect(elementListParser.parse(eq(Token.ELEMENT_SEPARATOR)))
-			.andReturn(Token.SEGMENT_TERMINATOR);
-		expect(segmentParserFactory.create(anyObject(Tokenizer.class),
-			eq(location), eq(handler), eq("DTP")))
-			.andReturn(segmentParser);
-		expect(segmentParser.parse(eq(new Token(Token.Type.WORD, "DTP"))))
-			.andReturn(Token.SEGMENT_TERMINATOR);
+    replay();
 
-		readTokens(
-			Token.ELEMENT_SEPARATOR,
-			// Read by the elementListParser mock
-			Token.word("DTP"),
-			// Read by the child segment parser
-			Token.word("EB")
-		);
-		
-		handler.startLoop("HL");
-		handler.startSegment("HL");
-		// DTP is parsed by a mock; no handler events generated
-		// EB is not parsed
-		handler.endSegment();
-		handler.endLoop();
+    final HlLoopParser hlParser = new HlLoopParser(tokenizer, location, handler,
+        elementListParserFactory, segmentParserFactory);
+    hlParser.parse(Token.word("HL"));
+  }
 
-		replay();
+  public void testSingleHlLoop_terminatesAfterOneSegment() throws Exception {
+    expect(
+        elementListParserFactory.create(anyObject(EdiLocation.class), anyObject(Tokenizer.class),
+            anyObject(EdiHandler.class))).andReturn(elementListParser);
+    expect(elementListParser.parse(eq(Token.ELEMENT_SEPARATOR)))
+        .andReturn(Token.SEGMENT_TERMINATOR);
+    expect(
+        segmentParserFactory.create(anyObject(Tokenizer.class), eq(location), eq(handler),
+            eq("DTP"))).andReturn(segmentParser);
+    expect(segmentParser.parse(eq(new Token(Token.Type.WORD, "DTP")))).andReturn(
+        Token.SEGMENT_TERMINATOR);
 
-		HlLoopParser hlParser = new HlLoopParser(tokenizer, location, handler,
-				elementListParserFactory, segmentParserFactory);
-		hlParser.parse(Token.word("HL"));
+    readTokens(Token.ELEMENT_SEPARATOR,
+    // Read by the elementListParser mock
+        Token.word("DTP"),
+        // Read by the child segment parser
+        Token.word("EB"));
 
-		assertNotNull(tokenizer.nextToken());
-	}
+    handler.startLoop("HL");
+    handler.startSegment("HL");
+    // DTP is parsed by a mock; no handler events generated
+    // EB is not parsed
+    handler.endSegment();
+    handler.endLoop();
+
+    replay();
+
+    final HlLoopParser hlParser = new HlLoopParser(tokenizer, location, handler,
+        elementListParserFactory, segmentParserFactory);
+    hlParser.parse(Token.word("HL"));
+
+    assertNotNull(tokenizer.nextToken());
+  }
 }

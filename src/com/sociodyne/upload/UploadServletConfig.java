@@ -13,9 +13,9 @@ import com.google.inject.servlet.GuiceServletContextListener;
  */
 public class UploadServletConfig extends GuiceServletContextListener {
 
-	@Override
-	protected Injector getInjector() {
-		return Guice.createInjector(new UploadModule());
-	}
+  @Override
+  protected Injector getInjector() {
+    return Guice.createInjector(new UploadModule());
+  }
 
 }

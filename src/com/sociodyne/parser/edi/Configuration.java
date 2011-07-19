@@ -5,77 +5,78 @@ import com.sociodyne.LockingHolder;
 import com.google.common.base.Preconditions;
 
 public class Configuration {
-	private char segmentTerminator = '~';
-	private char elementSeparator = '*';
-	private LockingHolder<Character> subElementSeparator = LockingHolder
-			.of((Character)null);
 
-	public static class Builder {
-		private Character segmentTerminator;
-		private Character elementSeparator;
-		private Character subElementSeparator;
+  private char segmentTerminator = '~';
+  private char elementSeparator = '*';
+  private final LockingHolder<Character> subElementSeparator = LockingHolder.of((Character) null);
 
-		public Builder setSegmentTerminator(char segmentTerminator) {
-			this.segmentTerminator = segmentTerminator;
-			return this;
-		}
+  public static class Builder {
 
-		public Builder setElementSeparator(char elementSeparator) {
-			this.elementSeparator = elementSeparator;
-			return this;
-		}
+    private Character segmentTerminator;
+    private Character elementSeparator;
+    private Character subElementSeparator;
 
-		public Builder setSubElementSeparator(char subElementSeparator) {
-			this.subElementSeparator = subElementSeparator;
-			return this;
-		}
+    public Builder setSegmentTerminator(char segmentTerminator) {
+      this.segmentTerminator = segmentTerminator;
+      return this;
+    }
 
-		public Configuration build() {
-			Configuration configuration = new Configuration();
-			if (segmentTerminator != null) {
-				configuration.segmentTerminator = segmentTerminator;
-			}
-			if (elementSeparator != null) {
-				configuration.elementSeparator = elementSeparator;
-			}
-			if (subElementSeparator != null) {
-				configuration.subElementSeparator.set(subElementSeparator);
-			}
+    public Builder setElementSeparator(char elementSeparator) {
+      this.elementSeparator = elementSeparator;
+      return this;
+    }
 
-			return configuration;
-		}
-	}
+    public Builder setSubElementSeparator(char subElementSeparator) {
+      this.subElementSeparator = subElementSeparator;
+      return this;
+    }
 
-	public boolean isSubElementSeparator(char ch) {
-		return subElementSeparator.get() != null && subElementSeparator.get() == ch;
-	}
+    public Configuration build() {
+      final Configuration configuration = new Configuration();
+      if (segmentTerminator != null) {
+        configuration.segmentTerminator = segmentTerminator;
+      }
+      if (elementSeparator != null) {
+        configuration.elementSeparator = elementSeparator;
+      }
+      if (subElementSeparator != null) {
+        configuration.subElementSeparator.set(subElementSeparator);
+      }
 
-	public void setSubElementSeparator(Character subElementSeparator) {
-		// This is only allowed to change once during parsing: in the ISA
-		// block.
-		this.subElementSeparator.set(subElementSeparator);
-		this.subElementSeparator.lock();
-	}
+      return configuration;
+    }
+  }
 
-	public boolean isSegmentTerminator(char ch) {
-		return segmentTerminator == ch;
-	}
+  public boolean isSubElementSeparator(char ch) {
+    return subElementSeparator.get() != null && subElementSeparator.get() == ch;
+  }
 
-	public boolean isElementSeparator(char ch) {
-		return ch == elementSeparator;
-	}
+  public void setSubElementSeparator(Character subElementSeparator) {
+    // This is only allowed to change once during parsing: in the ISA
+    // block.
+    this.subElementSeparator.set(subElementSeparator);
+    this.subElementSeparator.lock();
+  }
 
-	public char getSegmentTerminator() {
-		return segmentTerminator;
-	}
+  public boolean isSegmentTerminator(char ch) {
+    return segmentTerminator == ch;
+  }
 
-	public char getElementSeparator() {
-		return elementSeparator;
-	}
+  public boolean isElementSeparator(char ch) {
+    return ch == elementSeparator;
+  }
 
-	public char getSubElementSeparator() {
-		Preconditions.checkState(subElementSeparator.get() != null,
-			"Sub-element separtor not assigned");
-		return subElementSeparator.get();
-	}
+  public char getSegmentTerminator() {
+    return segmentTerminator;
+  }
+
+  public char getElementSeparator() {
+    return elementSeparator;
+  }
+
+  public char getSubElementSeparator() {
+    Preconditions
+        .checkState(subElementSeparator.get() != null, "Sub-element separtor not assigned");
+    return subElementSeparator.get();
+  }
 }
