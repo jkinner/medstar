@@ -158,6 +158,13 @@ public class EdiXmlReader implements XMLReader {
         isaFilterHandler);
     try {
       Token isaToken = tokenizer.nextToken();
+      if (isaToken == null) {
+        // No content. Produce a valid, empty document.
+        contentHandler.endElement(EdiXmlAdapter.NAMESPACE_URI, EdiXmlAdapter.EDI_ELEMENT,
+            EdiXmlAdapter.EDI_ELEMENT);
+        contentHandler.endDocument();
+        return;
+      }
       if (!isaToken.equals(Token.word("ISA"))) {
         throw new UnexpectedTokenException(isaToken, Token.word("ISA"));
       }
