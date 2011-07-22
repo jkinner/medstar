@@ -1,13 +1,25 @@
 package com.sociodyne.parser.edi;
 
+import com.sociodyne.parser.Location;
+
+import javax.annotation.Nullable;
+
 public class EdiLocation extends ImmutableEdiLocation {
+  public EdiLocation(Location location, String segment, int element,
+      @Nullable Integer subElement) {
+    super(location, segment, element, subElement);
+  }
+
+  public EdiLocation(Location location, String segment, int element) {
+    this(location, segment, element, null);
+  }
 
   public EdiLocation(String segment, int element) {
-    super(segment, element);
+    this(null, segment, element, null);
   }
 
   public EdiLocation(String segment, int element, int subElement) {
-    super(segment, element, subElement);
+    this(null, segment, element, subElement);
   }
 
   public void startSegment(String segment) {

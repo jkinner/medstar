@@ -13,23 +13,28 @@ import com.google.common.base.Objects;
  * 
  * @author jkinner@sociodyne.com (Jason Kinenr)
  */
-public class ImmutableEdiLocation extends Location {
+public class ImmutableEdiLocation {
+
+  private final Location location;
 
   protected String segment;
   protected int element;
   @Nullable
   protected Integer subElement;
 
-  public ImmutableEdiLocation(String segment, int element) {
-    this.segment = segment;
-    this.element = element;
-    subElement = null;
-  }
-
-  public ImmutableEdiLocation(String segment, int element, int subElement) {
+  public ImmutableEdiLocation(Location location, String segment, int element, Integer subElement) {
+    this.location = location;
     this.segment = segment;
     this.element = element;
     this.subElement = subElement;
+  }
+
+  public ImmutableEdiLocation(String segment, int element) {
+    this(null, segment, element, null);
+  }
+
+  public ImmutableEdiLocation(String segment, int element, int subElement) {
+    this(null, segment, element, subElement);
   }
 
   public String getSegment() {
@@ -46,7 +51,7 @@ public class ImmutableEdiLocation extends Location {
 
   @Override
   public int hashCode() {
-    return Objects.hashCode(segment, element);
+    return Objects.hashCode(location, segment, element, subElement);
   }
 
   @Override
@@ -57,8 +62,8 @@ public class ImmutableEdiLocation extends Location {
 
     if (o instanceof ImmutableEdiLocation) {
       final ImmutableEdiLocation that = (ImmutableEdiLocation) o;
-      return Objects.equal(segment, that.segment) && Objects.equal(element, that.element)
-          && Objects.equal(subElement, that.subElement);
+      return Objects.equal(location, that.location) && Objects.equal(segment, that.segment)
+          && Objects.equal(element, that.element) && Objects.equal(subElement, that.subElement);
     }
 
     return false;
@@ -73,13 +78,17 @@ public class ImmutableEdiLocation extends Location {
   }
 
   public static ImmutableEdiLocation copyOf(ImmutableEdiLocation location) {
-    return new ImmutableEdiLocation(location.segment, location.element, location.subElement);
+    return new ImmutableEdiLocation(location.location, location.segment, location.element,
+        location.subElement);
   }
 
   @Override
   public String toString() {
-    final StringBuffer locationBuffer = new StringBuffer(super.toString());
-    locationBuffer.append(", segment ").append(segment);
+    final StringBuffer locationBuffer = new StringBuffer(location != null?location.toString():"");
+    if (locationBuffer.length() > 0) {
+      locationBuffer.append(", ");
+    }
+    locationBuffer.append("segment ").append(segment);
     if (element > 0) {
       locationBuffer.append(", element ").append(element);
     }

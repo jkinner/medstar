@@ -1,5 +1,6 @@
 package com.sociodyne.test.parser.edi;
 
+import com.sociodyne.parser.Location;
 import com.sociodyne.parser.edi.EdiHandler;
 import com.sociodyne.parser.edi.EdiLocation;
 import com.sociodyne.parser.edi.Token;
@@ -17,6 +18,8 @@ public class MockEdiParserTest extends MockTest {
   protected EdiHandler handler;
   @Mock(Mock.Type.NICE)
   protected EdiLocation location;
+  @Mock(Mock.Type.NICE)
+  protected Location fileLocation;
 
   protected void readTokens(Token... tokens) throws Exception {
     for (final Token token : tokens) {

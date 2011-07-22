@@ -1,6 +1,7 @@
 package com.sociodyne.parser.edi;
 
 import com.sociodyne.common.Exceptions;
+import com.sociodyne.parser.Location;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -142,8 +143,10 @@ public class EdiXmlReader implements XMLReader {
     final Configuration configuration = new Configuration.Builder()
         .setSegmentTerminator(segmentTerminator).setElementSeparator(elementSeparator).build();
 
-    final EdiLocation location = new EdiLocation("ISA", 0);
-    final Tokenizer tokenizer = new Tokenizer(reader, configuration, location);
+    final Location fileLocation = new Location();
+    final EdiLocation location = new EdiLocation(fileLocation, "ISA", 0);
+    
+    final Tokenizer tokenizer = new Tokenizer(reader, configuration, fileLocation);
 
     contentHandler.startDocument();
     contentHandler.startElement(EdiXmlAdapter.NAMESPACE_URI, EdiXmlAdapter.EDI_ELEMENT,

@@ -37,7 +37,7 @@ public class ElementListParserTest extends MockEdiParserTest {
     replay();
 
     final Reader r = new CharArrayReader(new String("123~").toCharArray());
-    final Tokenizer tokenizer = new Tokenizer(r, configuration, location);
+    final Tokenizer tokenizer = new Tokenizer(r, configuration, fileLocation);
     final ElementListParser parser = new ElementListParser(tokenizer, location, handler,
         subElementListParserFactory);
     assertEquals(Token.SEGMENT_TERMINATOR, parser.parse(Token.ELEMENT_SEPARATOR));
@@ -49,7 +49,7 @@ public class ElementListParserTest extends MockEdiParserTest {
     replay();
 
     final Reader r = new CharArrayReader(new String("123").toCharArray());
-    final Tokenizer tokenizer = new Tokenizer(r, configuration, location);
+    final Tokenizer tokenizer = new Tokenizer(r, configuration, fileLocation);
     final ElementListParser parser = new ElementListParser(tokenizer, location, handler,
         subElementListParserFactory);
     try {
@@ -69,7 +69,7 @@ public class ElementListParserTest extends MockEdiParserTest {
     replay();
 
     final Reader r = new CharArrayReader(new String("123:234~").toCharArray());
-    final Tokenizer tokenizer = new Tokenizer(r, configuration, location);
+    final Tokenizer tokenizer = new Tokenizer(r, configuration, fileLocation);
     final ElementListParser parser = new ElementListParser(tokenizer, location, handler,
         subElementListParserFactory);
     parser.parse(Token.ELEMENT_SEPARATOR);
@@ -87,7 +87,7 @@ public class ElementListParserTest extends MockEdiParserTest {
     replay();
 
     final Reader r = new CharArrayReader(new String("123|"/* 234: */+ "123~").toCharArray());
-    final Tokenizer tokenizer = new Tokenizer(r, configuration, location);
+    final Tokenizer tokenizer = new Tokenizer(r, configuration, fileLocation);
     final ElementListParser parser = new ElementListParser(tokenizer, location, handler,
         subElementListParserFactory);
     parser.parse(Token.ELEMENT_SEPARATOR);
@@ -102,7 +102,7 @@ public class ElementListParserTest extends MockEdiParserTest {
     replay();
 
     final Reader r = new CharArrayReader(new String("123|234").toCharArray());
-    final Tokenizer tokenizer = new Tokenizer(r, configuration, location);
+    final Tokenizer tokenizer = new Tokenizer(r, configuration, fileLocation);
     final ElementListParser parser = new ElementListParser(tokenizer, location, handler,
         subElementListParserFactory);
     try {
