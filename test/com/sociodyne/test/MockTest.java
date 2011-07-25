@@ -28,30 +28,52 @@ public class MockTest extends TestCase {
         final Mock mockAnnotation = field.getAnnotation(Mock.class);
         if (mockAnnotation != null) {
           Object mock;
-          if (mockAnnotation.value() != null) {
-            switch (mockAnnotation.value()) {
-            case STRICT:
-              mock = EasyMock.createStrictMock(field.getType());
-              break;
-            case NICE:
-              mock = EasyMock.createNiceMock(field.getType());
-              break;
-            case DEFAULT:
-            default:
-              mock = EasyMock.createMock(field.getType());
+          Class<?> fieldType = field.getType();
+          if (fieldType.isArray()) {
+            // Create an array of mocks
+            field.setAccessible(true);
+            Object[] mockArray = (Object[]) field.get(this);
+            for (int i = 0; i < mockArray.length; i++) {
+              mock = createMockUsingAnnotation(fieldType.getComponentType(), mockAnnotation);
+              objectsToVerify.add(mock);
+              mockArray[i] = mock;
             }
+            field.setAccessible(false);
           } else {
-            mock = EasyMock.createMock(field.getType());
+            mock = createMockUsingAnnotation(fieldType, mockAnnotation);
+
+            field.setAccessible(true);
+            field.set(this, mock);
+            field.setAccessible(false);
+
+            objectsToVerify.add(mock);
           }
 
-          field.setAccessible(true);
-          field.set(this, mock);
-          objectsToVerify.add(mock);
         }
       }
 
       clazz = clazz.getSuperclass();
     }
+  }
+
+  private Object createMockUsingAnnotation(Class<?> fieldType, final Mock mockAnnotation) {
+    Object mock;
+    if (mockAnnotation.value() != null) {
+      switch (mockAnnotation.value()) {
+      case STRICT:
+        mock = EasyMock.createStrictMock(fieldType);
+        break;
+      case NICE:
+        mock = EasyMock.createNiceMock(fieldType);
+        break;
+      case DEFAULT:
+      default:
+        mock = EasyMock.createMock(fieldType);
+      }
+    } else {
+      mock = EasyMock.createMock(fieldType);
+    }
+    return mock;
   }
 
   @Override
