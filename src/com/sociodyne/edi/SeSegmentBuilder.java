@@ -4,15 +4,12 @@ import com.sociodyne.Strings;
 import com.sociodyne.parser.edi.EdiException;
 import com.sociodyne.parser.edi.EdiHandler;
 
-import com.google.inject.Inject;
 
-
-public class GeSegmentBuilder {
+public class SeSegmentBuilder {
   private final EdiBuilder ediBuilder;
   private boolean padControlNumber;
 
-  @Inject
-  GeSegmentBuilder(final EdiBuilder ediBuilder) {
+  public SeSegmentBuilder(final EdiBuilder ediBuilder) {
     this.ediBuilder = ediBuilder;
   }
 
@@ -20,19 +17,20 @@ public class GeSegmentBuilder {
     this.padControlNumber = padControlNumber;
   }
 
-  public void build(EdiHandler handler) throws EdiException {
+  public void build(EdiHandler handler)
+      throws EdiException {
 
-    String controlNumber = Integer.toString(ediBuilder.getGsSequenceNumber());
+    String controlNumber = Integer.toString(ediBuilder.getStSequenceNumber());
     if (padControlNumber) {
       controlNumber = Strings.padLeft(controlNumber, '0', 9);
     }
 
     String fields[] = {
-        Integer.toString(ediBuilder.getGsSequenceCount()),
+        Integer.toString(ediBuilder.getStSegmentCount()),
         controlNumber
     };
 
-    handler.startSegment("GE");
+    handler.startSegment("SE");
     for (String field : fields) {
       handler.startElement(field);
       handler.endElement();

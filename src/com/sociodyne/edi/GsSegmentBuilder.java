@@ -104,5 +104,6 @@ public class GsSegmentBuilder {
       handler.startElement(field);
       handler.endElement();
     }
+    handler.endSegment();
   }
 }

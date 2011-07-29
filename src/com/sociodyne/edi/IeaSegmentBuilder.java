@@ -28,5 +28,6 @@ public class IeaSegmentBuilder {
       handler.startElement(field);
       handler.endElement();
     }
+    handler.endSegment();
   }
 }

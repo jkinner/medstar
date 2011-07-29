@@ -182,5 +182,6 @@ public class IsaSegmentBuilder {
       handler.startElement(field);
       handler.endElement();
     }
+    handler.endSegment();
   }
 }

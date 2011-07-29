@@ -97,6 +97,7 @@ public class IsaSegmentBuilderTest extends MockTest {
     handler.startElement(eq(":"));
     handler.endElement();
     expectLastCall().times(16);
+    handler.endSegment();
 
     replay();
 

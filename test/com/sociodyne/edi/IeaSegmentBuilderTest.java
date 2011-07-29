@@ -26,6 +26,7 @@ public class IeaSegmentBuilderTest extends MockTest {
     handler.startElement(eq("000000123"));
     handler.endElement();
     expectLastCall().times(2);
+    handler.endSegment();
 
     replay();
 

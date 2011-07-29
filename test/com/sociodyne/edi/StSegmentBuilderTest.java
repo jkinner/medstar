@@ -16,14 +16,14 @@ import java.util.Calendar;
  * 
  * @author jkinner@sociodyne.com
  */
-public class GsSegmentBuilderTest extends MockTest {
+public class StSegmentBuilderTest extends MockTest {
   @Mock EdiBuilder ediBuilder;
   @Mock EdiHandler handler;
 
   public void testNoFieldsSet_throwsIllegalStateException() throws Exception {
     replay();
 
-    GsSegmentBuilder builder = new GsSegmentBuilder(ediBuilder);
+    StSegmentBuilder builder = new StSegmentBuilder(ediBuilder);
     try {
       builder.build(handler);
       fail("Expected IllegalStateException");
@@ -33,19 +33,13 @@ public class GsSegmentBuilderTest extends MockTest {
   }
 
   public void testAllFieldsSet_controlNumberPadding() throws Exception {
-    expect(ediBuilder.startGsSequence()).andReturn(123);
+    expect(ediBuilder.startStSequence()).andReturn(123);
 
-    handler.startSegment(eq("GS"));
-    handler.startElement(eq("HS"));
-    handler.startElement(eq("XX"));
-    handler.startElement(eq("YY"));
-    handler.startElement(eq("110726"));
-    handler.startElement(eq("0836"));
+    handler.startSegment(eq("ST"));
+    handler.startElement(eq("270"));
     handler.startElement(eq("000000123"));
-    handler.startElement(eq("X"));
-    handler.startElement(eq("004010X092A1"));
     handler.endElement();
-    expectLastCall().times(8);
+    expectLastCall().times(2);
     handler.endSegment();
 
     replay();
@@ -57,32 +51,21 @@ public class GsSegmentBuilderTest extends MockTest {
     calendar.set(Calendar.HOUR_OF_DAY, 8);
     calendar.set(Calendar.MINUTE, 36);
 
-    GsSegmentBuilder builder = new GsSegmentBuilder(ediBuilder)
+    StSegmentBuilder builder = new StSegmentBuilder(ediBuilder)
       .setPadControlNumber(true)
-      .setFunctionalId("HS")
-      .setApplicationSenderCode("XX")
-      .setApplicationReceiverCode("YY")
-      .setCreated(calendar)
-      .setResponsibleAgencyCode("X")
-      .setVersionIndustryReleaseCode("004010X092A1");
+      .setIdentifierCode("270");
 
     builder.build(handler);
   }
   
   public void testAllFieldsSet_noControlNumberPadding() throws Exception {
-    expect(ediBuilder.startGsSequence()).andReturn(123);
+    expect(ediBuilder.startStSequence()).andReturn(123);
 
-    handler.startSegment(eq("GS"));
-    handler.startElement(eq("HS"));
-    handler.startElement(eq("XX"));
-    handler.startElement(eq("YY"));
-    handler.startElement(eq("110726"));
-    handler.startElement(eq("0836"));
+    handler.startSegment(eq("ST"));
+    handler.startElement(eq("270"));
     handler.startElement(eq("123"));
-    handler.startElement(eq("X"));
-    handler.startElement(eq("004010X092A1"));
     handler.endElement();
-    expectLastCall().times(8);
+    expectLastCall().times(2);
     handler.endSegment();
 
     replay();
@@ -94,14 +77,9 @@ public class GsSegmentBuilderTest extends MockTest {
     calendar.set(Calendar.HOUR_OF_DAY, 8);
     calendar.set(Calendar.MINUTE, 36);
 
-    GsSegmentBuilder builder = new GsSegmentBuilder(ediBuilder)
-      .setPadControlNumber(false)
-      .setFunctionalId("HS")
-      .setApplicationSenderCode("XX")
-      .setApplicationReceiverCode("YY")
-      .setCreated(calendar)
-      .setResponsibleAgencyCode("X")
-      .setVersionIndustryReleaseCode("004010X092A1");
+    StSegmentBuilder builder = new StSegmentBuilder(ediBuilder)
+    .setPadControlNumber(false)
+    .setIdentifierCode("270");
 
     builder.build(handler);
   }

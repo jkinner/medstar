@@ -14,15 +14,15 @@ import com.sociodyne.test.MockTest;
  * 
  * @author jkinner@sociodyne.com
  */
-public class GeSegmentBuilderTest extends MockTest {
+public class SeSegmentBuilderTest extends MockTest {
   @Mock EdiBuilder ediBuilder;
   @Mock EdiHandler handler;
 
   public void testAllFieldsSet_controlNumberPadding() throws Exception {
-    expect(ediBuilder.getGsSequenceNumber()).andReturn(123);
-    expect(ediBuilder.getGsSequenceCount()).andReturn(1);
+    expect(ediBuilder.getStSequenceNumber()).andReturn(123);
+    expect(ediBuilder.getStSegmentCount()).andReturn(1);
 
-    handler.startSegment(eq("GE"));
+    handler.startSegment(eq("SE"));
     handler.startElement(eq("1"));
     handler.startElement(eq("000000123"));
     handler.endElement();
@@ -31,17 +31,17 @@ public class GeSegmentBuilderTest extends MockTest {
 
     replay();
 
-    GeSegmentBuilder builder = new GeSegmentBuilder(ediBuilder);
+    SeSegmentBuilder builder = new SeSegmentBuilder(ediBuilder);
     builder.setPadControlNumber(true);
     builder.build(handler);
   }
   
   public void testAllFieldsSet_noControlNumberPadding() throws Exception {
-    expect(ediBuilder.getGsSequenceNumber()).andReturn(123);
-    expect(ediBuilder.getGsSequenceCount()).andReturn(1);
+    expect(ediBuilder.getStSequenceNumber()).andReturn(123);
+    expect(ediBuilder.getStSegmentCount()).andReturn(2);
 
-    handler.startSegment(eq("GE"));
-    handler.startElement(eq("1"));
+    handler.startSegment(eq("SE"));
+    handler.startElement(eq("2"));
     handler.startElement(eq("123"));
     handler.endElement();
     expectLastCall().times(2);
@@ -49,7 +49,7 @@ public class GeSegmentBuilderTest extends MockTest {
 
     replay();
 
-    GeSegmentBuilder builder = new GeSegmentBuilder(ediBuilder);
+    SeSegmentBuilder builder = new SeSegmentBuilder(ediBuilder);
     builder.setPadControlNumber(false);
     builder.build(handler);
   }
