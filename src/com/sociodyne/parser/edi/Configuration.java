@@ -47,6 +47,10 @@ public class Configuration {
     }
   }
 
+  public static Builder builder() {
+    return new Builder();
+  }
+
   public boolean isSubElementSeparator(char ch) {
     return subElementSeparator.get() != null && subElementSeparator.get() == ch;
   }
