@@ -4,6 +4,11 @@ import com.sociodyne.LockingHolder;
 
 import com.google.common.base.Preconditions;
 
+/**
+ * Parser configuration for EDI separators.
+ * 
+ * @author jkinner@sociodyne.com (Jason Kinner)
+ */
 public class Configuration {
 
   private char segmentTerminator = '~';

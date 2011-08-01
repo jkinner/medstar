@@ -10,7 +10,11 @@ import com.sociodyne.test.MockTest;
 
 import com.google.inject.Provider;
 
-
+/**
+ * Tests for {@link EdiBuilder}.
+ * 
+ * @author jkinner@sociodyne.com (Jason Kinner)
+ */
 public class EdiBuilderTest extends MockTest {
   @Mock Provider<Integer> isaSequenceGenerator;
   @Mock Provider<Integer> gsSequenceGenerator;

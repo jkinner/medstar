@@ -6,7 +6,11 @@ import com.sociodyne.parser.edi.EdiHandler;
 
 import com.google.inject.Inject;
 
-
+/**
+ * Builds the "group end" ({@code GE}) segment for a particular {@link EdiBuilder}.
+ * 
+ * @author jkinner@sociodyne.com (Jason Kinner)
+ */
 public class GeSegmentBuilder {
   private final EdiBuilder ediBuilder;
   private boolean padControlNumber;
@@ -16,6 +20,7 @@ public class GeSegmentBuilder {
     this.ediBuilder = ediBuilder;
   }
 
+  /** Sets the option of left-padding the control number. */
   public void setPadControlNumber(final boolean padControlNumber) {
     this.padControlNumber = padControlNumber;
   }

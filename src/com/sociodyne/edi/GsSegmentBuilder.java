@@ -8,25 +8,42 @@ import java.util.Calendar;
 
 import com.google.common.base.Preconditions;
 
-
+/**
+ * Builds the "group start" ({@code GS}) segment for a given {@link EdiBuilder}.
+ * 
+ * @author jkinner@sociodyne.com (Jason Kinner)
+ */
 public class GsSegmentBuilder {
 
+  /** Type of request in the group (e.g. "HS" for a health-care status request) */
   private String functionalId;
+  /** Application code of the sender of the request. Typically assigned by a gateway. */
   private String applicationSenderCode;
+  /** Application code of the receiver of the request. Typically a gateway defines one of these. */
   private String applicationReceiverCode;
+  /**
+   * When this segment was created. {@code EdiBuilder} ensures this time is the same as the
+   * {@code ISA} created time.
+   */
   private Calendar created;
   private String responsibleAgencyCode;
+
+  /**
+   * Identifier for the specific EDI implementation that this document is intended to comply with.
+   */
   private String versionIndustryReleaseCode;
 
   private final EdiBuilder ediBuilder;
 
   // Configuration
+  /** Whether to left-pad the control number. */
   private boolean padControlNumber;
   
   public GsSegmentBuilder(EdiBuilder ediBuilder) {
     this.ediBuilder = ediBuilder;
   }
 
+  /** Sets whether to left-pad the sequence control number in the segment. */
   public GsSegmentBuilder setPadControlNumber(boolean padControlNumber) {
     this.padControlNumber = padControlNumber;
     return this;

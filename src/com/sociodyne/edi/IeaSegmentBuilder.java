@@ -4,7 +4,11 @@ import com.sociodyne.Strings;
 import com.sociodyne.parser.edi.EdiException;
 import com.sociodyne.parser.edi.EdiHandler;
 
-
+/**
+ * Builds the "end interaction" ({@code IEA}) segment for a given {@link EdiBuilder}.
+ * 
+ * @author jkinner@sociodyne.com (Jason Kinner)
+ */
 public class IeaSegmentBuilder {
   private final EdiBuilder ediBuilder;
   

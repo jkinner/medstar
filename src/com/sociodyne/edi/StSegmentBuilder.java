@@ -6,7 +6,11 @@ import com.sociodyne.parser.edi.EdiHandler;
 
 import com.google.common.base.Preconditions;
 
-
+/**
+ * Builds the "sequence start" ({@code ST}) EDI segment for a given {@link EdiBuilder}.
+ * 
+ * @author jkinner@sociodyne.com (Jason Kinner)
+ */
 public class StSegmentBuilder {
 
   private String identifierCode;

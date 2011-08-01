@@ -7,6 +7,11 @@ import java.lang.annotation.Target;
 
 import com.google.inject.BindingAnnotation;
 
+/**
+ * Defines for which {@link Gateway} a particular binding is for.
+ * 
+ * @author jkinner@sociodyne.com (Jason Kinner)
+ */
 @BindingAnnotation
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.PARAMETER, ElementType.TYPE, ElementType.METHOD})

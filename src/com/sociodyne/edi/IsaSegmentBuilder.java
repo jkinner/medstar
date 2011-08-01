@@ -8,7 +8,11 @@ import java.util.Calendar;
 
 import com.google.common.base.Preconditions;
 
-
+/**
+ * Builds an {@code ISA} segment, the start of the EDI envelope.
+ * 
+ * @author jkinner@sociodyne.com (Jason Kinner)
+ */
 public class IsaSegmentBuilder {
 
   private String authorizeInfoQualifier;

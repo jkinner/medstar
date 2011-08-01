@@ -10,7 +10,7 @@ import com.sociodyne.test.MockTest;
 
 
 /**
- * Tests for {@link IsaSegmentBuilder}.
+ * Tests for {@link GeSegmentBuilder}.
  * 
  * @author jkinner@sociodyne.com
  */

@@ -5,7 +5,11 @@ import com.google.inject.Key;
 import com.google.inject.Singleton;
 import com.google.inject.assistedinject.FactoryModuleBuilder;
 
-
+/**
+ * Binds classes required for {@link EdiBuilder} and its sub-classes to function.
+ * 
+ * @author jkinner@sociodyne.com (Jason Kinner)
+ */
 public class EdiBuilderModule extends AbstractModule {
 
   @Override
