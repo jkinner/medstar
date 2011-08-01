@@ -1,4 +1,4 @@
-package com.sociodyne.validation.xml;
+package com.sociodyne.xml;
 
 
 /**

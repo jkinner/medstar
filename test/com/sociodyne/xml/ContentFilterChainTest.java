@@ -1,7 +1,10 @@
-package com.sociodyne.validation.xml;
+package com.sociodyne.xml;
 
 import com.sociodyne.test.Mock;
 import com.sociodyne.test.MockTest;
+import com.sociodyne.xml.ChainedContentHandler;
+import com.sociodyne.xml.ChainedContentHandlerBase;
+import com.sociodyne.xml.ContentFilterChain;
 
 import org.xml.sax.SAXException;
 
