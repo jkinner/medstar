@@ -1,10 +1,10 @@
 package com.sociodyne.test.parser.edi;
 
+import com.sociodyne.edi.parser.EdiHandler;
+import com.sociodyne.edi.parser.EdiLocation;
+import com.sociodyne.edi.parser.Token;
+import com.sociodyne.edi.parser.Tokenizer;
 import com.sociodyne.parser.Location;
-import com.sociodyne.parser.edi.EdiHandler;
-import com.sociodyne.parser.edi.EdiLocation;
-import com.sociodyne.parser.edi.Token;
-import com.sociodyne.parser.edi.Tokenizer;
 import com.sociodyne.test.Mock;
 import com.sociodyne.test.MockTest;
 
