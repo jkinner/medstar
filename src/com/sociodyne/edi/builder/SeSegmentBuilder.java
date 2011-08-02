@@ -1,8 +1,9 @@
 package com.sociodyne.edi.builder;
 
-import com.sociodyne.Strings;
 import com.sociodyne.edi.EdiException;
 import com.sociodyne.edi.parser.EdiHandler;
+
+import com.google.common.base.Strings;
 
 /**
  * Builds the "end sequence" ({@code SE}) segment for a given {@link EdiBuilder}.
@@ -26,7 +27,7 @@ public class SeSegmentBuilder {
 
     String controlNumber = Integer.toString(ediBuilder.getStSequenceNumber());
     if (padControlNumber) {
-      controlNumber = Strings.padLeft(controlNumber, '0', 9);
+      controlNumber = Strings.padStart(controlNumber, 9, '0');
     }
 
     String fields[] = {

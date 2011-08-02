@@ -1,10 +1,10 @@
 package com.sociodyne.edi.builder;
 
-import com.sociodyne.Strings;
 import com.sociodyne.edi.EdiException;
 import com.sociodyne.edi.parser.EdiHandler;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 
 /**
  * Builds the "sequence start" ({@code ST}) EDI segment for a given {@link EdiBuilder}.
@@ -40,7 +40,7 @@ public class StSegmentBuilder {
 
     String controlNumber = Integer.toString(ediBuilder.startStSequence());
     if (padControlNumber) {
-      controlNumber = Strings.padLeft(controlNumber, '0', 9);
+      controlNumber = Strings.padStart(controlNumber, 9, '0');
     }
 
     String fields[] = {

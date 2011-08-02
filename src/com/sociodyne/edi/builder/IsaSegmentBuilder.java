@@ -1,12 +1,12 @@
 package com.sociodyne.edi.builder;
 
-import com.sociodyne.Strings;
 import com.sociodyne.edi.EdiException;
 import com.sociodyne.edi.parser.EdiHandler;
 
 import java.util.Calendar;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Strings;
 
 /**
  * Builds an {@code ISA} segment, the start of the EDI envelope.
@@ -150,17 +150,21 @@ public class IsaSegmentBuilder {
     Preconditions.checkState(interchangeVersionId != null, "Interchange version ID must be set");
 
     StringBuffer createdDateBuffer = new StringBuffer();
-    Strings.padLeft(Integer.toString(created.get(Calendar.YEAR)).substring(2, 4), '0', 2, createdDateBuffer, 2);
-    Strings.padLeft(Integer.toString(created.get(Calendar.MONTH)), '0', 2, createdDateBuffer);
-    Strings.padLeft(Integer.toString(created.get(Calendar.DAY_OF_MONTH)), '0', 2,
-        createdDateBuffer);
+    createdDateBuffer.append(
+        Strings.padStart(Integer.toString(created.get(Calendar.YEAR)).substring(2, 4), 2, '0'));
+    createdDateBuffer.append(
+        Strings.padStart(Integer.toString(created.get(Calendar.MONTH)), 2, '0'));
+    createdDateBuffer.append(
+        Strings.padStart(Integer.toString(created.get(Calendar.DAY_OF_MONTH)), 2, '0'));
 
     StringBuffer createdTimeBuffer = new StringBuffer();
-    Strings.padLeft(Integer.toString(created.get(Calendar.HOUR_OF_DAY)), '0', 2, createdTimeBuffer);
-    Strings.padLeft(Integer.toString(created.get(Calendar.MINUTE)), '0', 2, createdTimeBuffer);
+    createdTimeBuffer.append(
+        Strings.padStart(Integer.toString(created.get(Calendar.HOUR_OF_DAY)), 2, '0'));
+    createdTimeBuffer.append(
+        Strings.padStart(Integer.toString(created.get(Calendar.MINUTE)), 2, '0'));
 
-    String controlNumber = Strings.padLeft(Integer.toString(ediBuilder.getIsaSequenceNumber()),
-        '0', 9);
+    String controlNumber = Strings.padStart(Integer.toString(ediBuilder.getIsaSequenceNumber()),
+        9, '0');
 
     String fields[] = {
         authorizeInfoQualifier == null?"":authorizeInfoQualifier,

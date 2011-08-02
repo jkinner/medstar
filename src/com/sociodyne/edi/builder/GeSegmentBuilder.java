@@ -1,9 +1,9 @@
 package com.sociodyne.edi.builder;
 
-import com.sociodyne.Strings;
 import com.sociodyne.edi.EdiException;
 import com.sociodyne.edi.parser.EdiHandler;
 
+import com.google.common.base.Strings;
 import com.google.inject.Inject;
 
 /**
@@ -29,7 +29,7 @@ public class GeSegmentBuilder {
 
     String controlNumber = Integer.toString(ediBuilder.getGsSequenceNumber());
     if (padControlNumber) {
-      controlNumber = Strings.padLeft(controlNumber, '0', 9);
+      controlNumber = Strings.padStart(controlNumber, 9, '0');
     }
 
     String fields[] = {

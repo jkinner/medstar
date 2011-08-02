@@ -1,8 +1,9 @@
 package com.sociodyne.edi.builder;
 
-import com.sociodyne.Strings;
 import com.sociodyne.edi.EdiException;
 import com.sociodyne.edi.parser.EdiHandler;
+
+import com.google.common.base.Strings;
 
 /**
  * Builds the "end interaction" ({@code IEA}) segment for a given {@link EdiBuilder}.
@@ -18,8 +19,8 @@ public class IeaSegmentBuilder {
 
   public void build(EdiHandler handler) throws EdiException {
 
-    String controlNumber = Strings.padLeft(Integer.toString(ediBuilder.getIsaSequenceNumber()),
-        '0', 9);
+    String controlNumber = Strings.padStart(Integer.toString(ediBuilder.getIsaSequenceNumber()),
+        9, '0');
 
     String fields[] = {
         // TODO(jkinner): Find out how to (optionally) transmit multiple functional groups
