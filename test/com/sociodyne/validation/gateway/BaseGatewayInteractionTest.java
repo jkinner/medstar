@@ -1,6 +1,6 @@
 package com.sociodyne.validation.gateway;
 
-import com.sociodyne.parser.edi.EdiXmlAdapter;
+import com.sociodyne.edi.parser.EdiXmlAdapter;
 import com.sociodyne.test.Mock;
 import com.sociodyne.test.MockTest;
 import com.sociodyne.test.gateway.TestGatewayInteraction;

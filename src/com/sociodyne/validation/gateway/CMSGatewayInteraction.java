@@ -1,7 +1,7 @@
 package com.sociodyne.validation.gateway;
 
-import com.sociodyne.parser.edi.Configuration;
-import com.sociodyne.parser.edi.EdiXmlTransformer;
+import com.sociodyne.edi.Configuration;
+import com.sociodyne.edi.parser.EdiXmlTransformer;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
