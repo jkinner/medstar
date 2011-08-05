@@ -1,5 +1,8 @@
 package com.sociodyne;
 
+import com.sociodyne.common.Join;
+import com.sociodyne.common.Patterns;
+
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;

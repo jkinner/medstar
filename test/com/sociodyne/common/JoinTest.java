@@ -1,8 +1,8 @@
-package com.sociodyne;
-
-import com.google.common.collect.ImmutableSet;
+package com.sociodyne.common;
 
 import junit.framework.TestCase;
+
+import com.google.common.collect.ImmutableSet;
 
 
 public class JoinTest extends TestCase {

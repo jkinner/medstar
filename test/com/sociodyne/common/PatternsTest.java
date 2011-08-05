@@ -1,12 +1,12 @@
-package com.sociodyne;
+package com.sociodyne.common;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import junit.framework.TestCase;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-
-import junit.framework.TestCase;
 
 
 /**

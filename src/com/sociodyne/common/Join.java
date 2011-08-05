@@ -1,6 +1,10 @@
-package com.sociodyne;
+package com.sociodyne.common;
 
-
+/**
+ * Utility class to join collections together using separators.
+ * 
+ * @author jkinner@sociodyne.com (Jason Kinner)
+ */
 public class Join {
   private Join() {
     // Utility class

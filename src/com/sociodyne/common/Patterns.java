@@ -1,4 +1,4 @@
-package com.sociodyne;
+package com.sociodyne.common;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
