@@ -1,3 +1,4 @@
+// Copyright 2011, Sociodyne LLC. All rights reserved.
 package com.sociodyne.validation.gateway;
 
 public class NonRecoverableGatewayInteractionException extends GatewayInteractionException {

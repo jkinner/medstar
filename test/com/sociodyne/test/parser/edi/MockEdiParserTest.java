@@ -1,3 +1,4 @@
+// Copyright 2011, Sociodyne LLC. All rights reserved.
 package com.sociodyne.test.parser.edi;
 
 import com.sociodyne.edi.parser.EdiHandler;
