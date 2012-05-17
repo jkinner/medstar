@@ -1,0 +1,6 @@
+Medstar is an EDI parser that was original focused on reading medical EDI documents. It is
+a general-purpose parser of EDI that can have additional validation layers implemented using
+the low-level parser infrastructure.
+
+This source code is released under the Lesser GNU Public Licence (LGPL) version 3. Read the
+LICENSE file for complete details.
